@@ -1,6 +1,6 @@
 import React from "react"
-import Signup from "./components/Signup"
-import Login from "./components/Login"
+import Signup from "./pages/Signup";
+import Login from "./pages/Login";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { CreateAccForm } from "./components/CreateAccForm"
 import Home from "./components/Home";
