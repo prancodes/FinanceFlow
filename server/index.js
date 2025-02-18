@@ -64,6 +64,7 @@ app.post('/login',async(req,res)=>{
     const {email,password}=req.body;
    try {
      const findUser= await User.findOne({email})
+     console.log(findUser)
      if(!findUser)
          {
              return res.status(404).json({message:"User doesn't exist"})
@@ -73,7 +74,8 @@ app.post('/login',async(req,res)=>{
              {
                  jwt.sign({userId:findUser._id},jwtSecret,{},(err,token)=>{
                      if(err) throw err
-                     res.cookie('token',token,{sameSite:'none',secure:true})
+                     res.cookie('token',token,{sameSite:'none',secure:true});
+                     return res.status(200).json({ message: "Login successful", token });
                  })
              }
              else{
