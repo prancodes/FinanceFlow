@@ -218,6 +218,7 @@ app.get("/dashboard/:accountId", async (req, res, next) => {
 
     res.json({
       ...account.toObject(),
+      initialBalance: parseFloat(account.initialBalance.toString()),
       balance: parseFloat(account.balance.toString()),
       transactions: account.transactions.map(txn => ({
         ...txn.toObject(),
