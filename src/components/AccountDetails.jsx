@@ -30,6 +30,9 @@ const AccountDetail = () => {
           <strong>Type:</strong> {account.type}
         </p>
         <p className="text-lg text-gray-700 mb-4">
+          <strong>InitialBalance:</strong> ${Number(account.initialBalance).toFixed(2)}
+        </p>
+        <p className="text-lg text-gray-700 mb-4">
           <strong>Balance:</strong> ${Number(account.balance).toFixed(2)}
         </p>
         <div className="mt-6">
