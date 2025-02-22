@@ -15,7 +15,7 @@ const Navbar = () => {
         </Link>
         {/* Desktop menu */}
         <div className="hidden md:flex space-x-6">
-          <Link to="/home">Home</Link>
+          <Link to="/">Home</Link>
           <Link to="/dashboard">Dashboard</Link>
           <Link to="/dashboard/addAccount">Create Account</Link>
           <Link to="/login">Login</Link>
