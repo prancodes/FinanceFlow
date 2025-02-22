@@ -1,3 +1,7 @@
+import dotenv from 'dotenv';
+if(process.env.NODE_ENV !== "production") {
+  dotenv.config();
+}
 import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';

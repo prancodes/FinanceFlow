@@ -1,15 +1,15 @@
+import dotenv from 'dotenv';
+if(process.env.NODE_ENV !== "production") {
+  dotenv.config();
+}
 import fs from 'node:fs/promises';
 import express from 'express';
 import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
-import dotenv from 'dotenv';
 import path from 'path';
 import MongoStore from 'connect-mongo';
 import CustomError from './utils/CustomError.js';
-
-// Load env variables
-dotenv.config({ path: './.env' });
 
 // Connect to MongoDB
 const MONGO_URL = process.env.MONGODB_URI;
