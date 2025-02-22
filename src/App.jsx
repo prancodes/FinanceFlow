@@ -6,6 +6,7 @@ import CreateAccForm from './components/CreateAccForm';
 import TransactionForm from './components/TransactionForm';
 import EditTransaction from './components/EditTransaction';
 import AccountDetail from './components/AccountDetails';
+import Analytics from './components/Analytics';
 import Home from './pages/Home';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
@@ -36,12 +37,13 @@ const App = ({ location }) => {
         <Navbar />
         <main className="flex-grow p-4">
           <Routes>
-            <Route path="/home" element={<Home />} />
+            <Route path="/" element={<Home />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/addAccount" element={<CreateAccForm />} />
             <Route path="/dashboard/:accountId/createTransaction" element={<TransactionForm />} />
             <Route path="/dashboard/:accountId/transaction/:transactionId/edit" element={<EditTransaction />} />
             <Route path="/dashboard/:accountId" element={<AccountDetail />} />
+            <Route path="/dashboard/:accountId/analytics" element={<Analytics />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
             <Route path="*" element={<h1 className="text-red-500 text-center">404: Page Not Found</h1>} />

@@ -17,7 +17,7 @@ const EditTransaction = () => {
   useEffect(() => {
     const fetchTransactionData = async () => {
       try {
-        const response = await fetch(`/dashboard/${accountId}/transaction/${transactionId}/edit`);
+        const response = await fetch(`/api/dashboard/${accountId}/transaction/${transactionId}/edit`);
         const data = await response.json();
         setTransaction({
           type: data.type || "",
@@ -44,7 +44,7 @@ const EditTransaction = () => {
         amount: parseFloat(transaction.amount),
       };
 
-      const response = await fetch(`/dashboard/${accountId}/transaction/${transactionId}`, {
+      const response = await fetch(`/api/dashboard/${accountId}/transaction/${transactionId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -64,8 +64,8 @@ const EditTransaction = () => {
 
   return (
     <div>
-      <link rel="stylesheet" href="/styles/tailwind.css" />
-      <form 
+ 
+      <form
         onSubmit={handleSubmit}
         className="max-w-2xl mx-auto mt-3 p-6 bg-white rounded-xl"
       >
@@ -171,7 +171,11 @@ const EditTransaction = () => {
         )}
 
         <div className="flex space-x-4">
-          <button type="button" className="w-1/2 px-4 py-2 hover:bg-gray-300 rounded-lg bg-gray-200">
+          <button
+            type="button"
+            onClick={() => navigate(`/dashboard/${accountId}`)}
+            className="w-1/2 px-4 py-2 hover:bg-gray-300 rounded-lg bg-gray-200"
+          >
             Cancel
           </button>
           <button type="submit" className="w-1/2 px-4 py-2 rounded-lg bg-gray-800 hover:bg-black text-white">

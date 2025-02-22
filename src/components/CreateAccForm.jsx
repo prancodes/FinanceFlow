@@ -10,7 +10,7 @@ const CreateAccForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/dashboard/addAccount', {
+      const response = await fetch('/api/dashboard/addAccount', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -32,7 +32,6 @@ const CreateAccForm = () => {
 
   return (
     <div>
-      <link rel="stylesheet" href="/styles/tailwind.css" />
       <form className="max-w-2xl mx-auto mt-10 p-6" onSubmit={handleSubmit}>
         <label className="mb-5 block text-2xl font-bold text-gray-900">Create New Account</label>
         <div className="mb-5">

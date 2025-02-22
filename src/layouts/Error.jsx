@@ -5,7 +5,7 @@ const Error = ({ message, statusCode = 500 }) => {
     <html>
       <head>
         <title>{`Error ${statusCode}`}</title>
-        <link rel="stylesheet" href="/styles/tailwind.css" />
+   
       </head>
       <body className="bg-gray-100 flex items-center justify-center h-screen">
         <div className="bg-white p-8 rounded shadow-lg max-w-md text-center">

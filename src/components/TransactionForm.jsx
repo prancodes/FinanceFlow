@@ -51,7 +51,7 @@ const TransactionForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`/dashboard/${accountId}`, {
+      const response = await fetch(`/api/dashboard/${accountId}/transaction`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -73,7 +73,6 @@ const TransactionForm = () => {
 
   return (
     <div>
-      <link rel="stylesheet" href="/styles/tailwind.css" />
       <form 
         onSubmit={handleSubmit}
         className="max-w-2xl mx-auto mt-3 p-6 bg-white rounded-xl"

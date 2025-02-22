@@ -1,6 +1,6 @@
 import React from 'react';
 import HeroSection from '../layouts/HeroSection';
-import { FeatureCard, ReviewCard, StatCard } from '../card'; 
+import { FeatureCard, ReviewCard, StatsCard } from '../card'; 
 import { FaChartBar, FaChartPie, FaReceipt, FaClipboardList, FaMoneyBillWave, FaCheckCircle } from "react-icons/fa";
 
 const LandingPage = () => {
@@ -11,10 +11,10 @@ const LandingPage = () => {
 
       {/* Stats Section */}
       <div className="p-6 bg-blue-50 text-center grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Active Users" value="20K+" />
-        <StatCard label="Transactions Tracked" value="₹2B+" />
-        <StatCard label="Uptime" value="99.9%" />
-        <StatCard label="User Rating" value="4.9/5" />
+        <StatsCard label="Active Users" value="20K+" />
+        <StatsCard label="Transactions Tracked" value="₹2B+" />
+        <StatsCard label="Uptime" value="99.9%" />
+        <StatsCard label="User Rating" value="4.9/5" />
       </div>
 
       {/* Features Section */}

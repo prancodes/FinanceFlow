@@ -24,7 +24,7 @@ export function FeatureCard({ icon: Icon, title, desc }) {
 }
 
 // Testimonial Card
-export function ReviewSection({ name, role, text }) {
+export function ReviewCard({ name, role, text }) {
   return (
     <Card className="p-6 shadow-md flex flex-col justify-between min-h-[200px]">
       <CardContent className="text-left flex flex-col justify-between h-full">
