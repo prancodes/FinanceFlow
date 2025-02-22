@@ -9,6 +9,7 @@ import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import path from 'path';
 import MongoStore from 'connect-mongo';
+import startScheduler from './utils/scheduler.js';
 import CustomError from './utils/CustomError.js';
 import errorHandler from './middleware/errorHandler.js';
 
@@ -130,5 +131,6 @@ app.use(errorHandler);
 
 // Start HTTP server
 app.listen(port, () => {
-  console.log(`Server started at http://localhost:${port}`)
+  console.log(`Server started at http://localhost:${port}`);
+  startScheduler();
 })
