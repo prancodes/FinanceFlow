@@ -35,10 +35,12 @@ const transactionSchema = new mongoose.Schema(
       default: null,
     },
     nextRecurringDate: { 
-        type: Date 
+        type: Date,
+        default:null
     },
     lastProcessed: { 
         type: Date 
+        
     },
   },
   { timestamps: true }
