@@ -8,20 +8,20 @@ const Navbar = () => {
   const toggleMenu = () => setIsOpen(!isOpen);
 
   return (
-    <nav className="bg-blue-600 text-white p-4">
+    <nav className="bg-white text-white p-4 fixed top-0 left-0 w-full shadow-md z-50">
+
       <div className="container mx-auto flex justify-between items-center">
-        <Link to="/home" className="font-bold text-lg">
-          FinanceFlow
-        </Link>
+        <div>
+          <img src="./FinanceFlow.png" alt="" className="h-8 w-auto"/>
+        </div>
         {/* Desktop menu */}
         <div className="hidden md:flex space-x-6">
-          <Link to="/">Home</Link>
-          <Link to="/dashboard">Dashboard</Link>
-          <Link to="/dashboard/addAccount">Create Account</Link>
-          <Link to="/login">Login</Link>
-          <Link to="/signup">Signup</Link>
+          <Link to="/dashboard" className="shadow-md px-3 py-2 rounded-md text-gray-500">Dashboard</Link>
+          <Link to="/dashboard/addAccount" className="shadow-md px-3 py-2 rounded-md text-black">Create Account</Link>
+          <Link to="/login" className="shadow-md bg-black text-white px-4 py-2 rounded-md">Login</Link>
+          <Link to="/signup" className="shadow-md bg-black text-white px-4 py-2 rounded-md">Signup</Link>
         </div>
-        {/* Mobile menu button */}
+ {/* Mobile menu button */}
         <div className="md:hidden">
           <button onClick={toggleMenu}>
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -39,8 +39,7 @@ const Analytics = ({ userId }) => {
 
   useEffect(() => {
     // Fetch analytics data from the backend
-    axios
-      .get(`/dashboard/${accountId}/analytics`)
+    axios.get(`/api/dashboard/${userId}/analytics`)
       .then((response) => {
         console.log("Analytics Data:", response.data); // Debugging
         setData(response.data);

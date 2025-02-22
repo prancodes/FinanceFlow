@@ -10,7 +10,7 @@ const CreateAccForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/dashboard/addAccount', {
+      const response = await fetch('/api/dashboard/addAccount', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

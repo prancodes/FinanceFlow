@@ -20,7 +20,7 @@ const Dashboard = () => {
 
   return (
     <>
-      <link rel="stylesheet" href="/styles/tailwind.css" />
+ 
       <div className="min-h-screen bg-gray-100 p-6">
         <div className="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
           <div className="flex justify-between items-center  mb-6">
