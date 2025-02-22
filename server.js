@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-if(process.env.NODE_ENV !== "production") {
+if (process.env.NODE_ENV !== "production") {
   dotenv.config();
 }
 import fs from 'node:fs/promises';
@@ -10,6 +10,7 @@ import session from 'express-session';
 import path from 'path';
 import MongoStore from 'connect-mongo';
 import CustomError from './utils/CustomError.js';
+import errorHandler from './middleware/errorHandler.js';
 
 // Connect to MongoDB
 const MONGO_URL = process.env.MONGODB_URI;
@@ -123,6 +124,9 @@ app.use('*all', async (req, res) => {
     res.status(500).end(e.stack)
   }
 })
+
+// Use the custom error handling middleware
+app.use(errorHandler);
 
 // Start HTTP server
 app.listen(port, () => {

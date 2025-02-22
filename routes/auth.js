@@ -74,13 +74,12 @@ router.post("/login", async (req, res, next) => {
         res.redirect("/dashboard");
       });
     } else {
-      throw new CustomError(401, "Incorrect password");
+      res.status(401).json({ error: "Incorrect password" });
     }
   } catch (error) {
     next(error);
   }
 });
-
 
 // Check authentication status
 router.get('/checkAuth', (req, res) => {

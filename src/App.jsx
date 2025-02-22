@@ -49,7 +49,7 @@ const App = ({ location }) => {
             <Route path="*" element={<h1 className="text-red-500 text-center">404: Page Not Found</h1>} />
           </Routes>
         </main>
-        <Footer/>
+        <Footer />
       </div>
     </Router>
   );
