@@ -9,7 +9,7 @@ const AccountDetail = () => {
   useEffect(() => {
     const fetchAccountData = async () => {
       try {
-        const response = await fetch(`/dashboard/${accountId}`);
+        const response = await fetch(`/api/dashboard/${accountId}`);
         const data = await response.json();
         setAccount(data);
       } catch (error) {
