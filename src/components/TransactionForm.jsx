@@ -1,6 +1,7 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import Tesseract from 'tesseract.js';
+import { FaUpload } from 'react-icons/fa';
+import ErrorMessage from '../components/ErrorMessage';
 
 const TransactionForm = () => {
   const { accountId } = useParams();
@@ -13,7 +14,10 @@ const TransactionForm = () => {
   const [recurringInterval, setRecurringInterval] = useState("Daily");
   const [receiptFile, setReceiptFile] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -31,37 +35,79 @@ const TransactionForm = () => {
     checkAuth();
   }, [navigate]);
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setReceiptFile(file);
-    } else {
-      console.error("No file selected");
-    }
+  const handleScanWithAI = async () => {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        if (!file.type.startsWith('image/')) {
+          setError("Only image files are allowed");
+          return;
+        }
+        setReceiptFile(file);
+        setIsLoading(true);
+        try {
+          const fileData = await readFileAsDataURL(file);
+          const response = await fetch(`/api/dashboard/${accountId}/transaction/scan-receipt`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ fileData, fileType: file.type }),
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            const parsedData = result.data;
+
+            const extractedAmount = parsedData.amount || "";
+            const extractedDate = parsedData.date ? new Date(parsedData.date).toISOString().split('T')[0] : "";
+            let extractedDescription = parsedData.description || "Scanned from receipt";
+            const extractedCategory = parsedData.category || "";
+            const extractedType = parsedData.type || "Expense";
+            const extractedIsRecurring = parsedData.isRecurring || "no";
+            const extractedRecurringInterval = parsedData.recurringInterval || null;
+
+            // Limit description to 10 words
+            const descriptionWords = extractedDescription.split(" ");
+            if (descriptionWords.length > 10) {
+              extractedDescription = descriptionWords.slice(0, 10).join(" ") + "...";
+            }
+
+            setAmount(extractedAmount);
+            setDate(extractedDate);
+            setDescription(extractedDescription);
+            setCategory(extractedCategory);
+            setType(extractedType);
+            setIsRecurring(extractedIsRecurring.toLowerCase() === "yes");
+            setRecurringInterval(extractedRecurringInterval);
+          } else {
+            setError("Failed to scan receipt");
+          }
+        } catch (error) {
+          setError("An error occurred while scanning the receipt.");
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setError("No file selected");
+      }
+    };
+    fileInput.click();
   };
 
-  const handleScanWithAI = () => {
-    if (!receiptFile) {
-      console.log('Please select a receipt file');
-      return;
-    }
-    const fileUrl = URL.createObjectURL(receiptFile);
-    Tesseract.recognize(fileUrl, 'eng', {
-      logger: (info) => console.log(info),
-    })
-    .then(({ data: { text } }) => {
-      console.log("Extracted Text:", text);
-      const totalMatch = text.match(/Total\s*[:£]?\s*(\d+(\.\d{2})?)/i) || 
-                         text.match(/Sub-Total\s*[:£]?\s*(\d+(\.\d{2})?)/i);
-      const extractedAmount = totalMatch ? totalMatch[1] : "";
-      const extractedDate = text.match(/\d{2}\/\d{2}\/\d{4}/);
-      setAmount(extractedAmount ? extractedAmount : "");
-      setDate(extractedDate ? extractedDate[0] : "");
-      setDescription("Scanned from receipt");
-    })
-    .catch((error) => {
-      console.error("Error scanning receipt:", error);
-      alert("An error occurred while scanning the receipt.");
+  const readFileAsDataURL = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        resolve(event.target.result);
+      };
+      reader.onerror = (error) => {
+        reject(error);
+      };
+      reader.readAsDataURL(file);
     });
   };
 
@@ -75,28 +121,28 @@ const TransactionForm = () => {
         },
         body: JSON.stringify({
           transaction: { 
-          type,
-          amount,
-          category, 
-          date,
-          description, 
-          isRecurring,
-          // Set the recurring interval only if it is isRecurring 
-          recurringInterval:isRecurring? recurringInterval : null,
-          account: accountId 
-        },
+            type,
+            amount,
+            category, 
+            date,
+            description, 
+            isRecurring,
+            recurringInterval: isRecurring ? recurringInterval : null,
+            account: accountId 
+          },
         }),
       });
 
       if (response.ok) {
         navigate(`/dashboard/${accountId}`);
       } else {
-        console.error('Failed to create transaction');
+        setError("Failed to create transaction");
       }
     } catch (error) {
-      console.error('Error creating transaction:', error);
+      setError("An error occurred while creating the transaction.");
     }
   };
+
   if (!isAuthenticated) {
     return null;
   }
@@ -105,24 +151,30 @@ const TransactionForm = () => {
     <div>
       <form 
         onSubmit={handleSubmit}
-        className="max-w-2xl mx-auto mt-3 p-6 bg-white rounded-xl"
+        className="max-w-2xl mx-auto mt-8 p-6 bg-white rounded-xl"
       >
         <h2 className="text-4xl font-bold text-blue-600 mb-4">Add Transaction</h2>
-        <div className="mb-4">
-          <label className="block text-black mb-2">Upload Receipt
-            <input 
-              type="file" 
-              onChange={handleFileUpload} 
-              className="w-full p-2 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200"
-            />
-          </label>
-        </div>
+        <ErrorMessage message={error} onClose={() => setError('')} />
         <button 
           type="button"
-          className="mb-4 w-full px-4 py-2 hover:cursor-pointer bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg hover:from-pink-600 hover:to-purple-600 transition-colors"
+          className="mb-4 w-full px-4 py-2 hover:cursor-pointer bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg hover:from-pink-600 hover:to-purple-600 transition-colors flex items-center justify-center"
           onClick={handleScanWithAI}
+          disabled={isLoading}
         >
-          Scan Receipt with AI
+          {isLoading ? (
+            <>
+              <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Scan Receipt with AI
+            </>
+          ) : (
+            <>
+              <FaUpload className="mr-3" />
+              Scan Receipt with AI
+            </>
+          )}
         </button>
 
         <div className="mb-4">
@@ -149,6 +201,7 @@ const TransactionForm = () => {
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
+                required
               />
             </label>
           </div>
@@ -164,6 +217,7 @@ const TransactionForm = () => {
             className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
+            required
           >
             <option>Select category</option>
             <option>Food</option>
@@ -180,6 +234,7 @@ const TransactionForm = () => {
               className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200"
               value={date}
               onChange={(e) => setDate(e.target.value)}
+              required
             />
           </label>
         </div>
@@ -193,6 +248,7 @@ const TransactionForm = () => {
               placeholder="Enter description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              required
             />
           </label>
         </div>
