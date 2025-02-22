@@ -46,6 +46,11 @@ const TransactionForm = () => {
           setError("Only image files are allowed");
           return;
         }
+        // Note: Ensure the file size is within the limit (e.g., 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          setError("File size exceeds the 5MB limit");
+          return;
+        }
         setReceiptFile(file);
         setIsLoading(true);
         try {
@@ -157,7 +162,7 @@ const TransactionForm = () => {
         <ErrorMessage message={error} onClose={() => setError('')} />
         <button 
           type="button"
-          className="mb-4 w-full px-4 py-2 hover:cursor-pointer bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg hover:from-pink-600 hover:to-purple-600 transition-colors flex items-center justify-center"
+          className="mb-2 w-full px-4 py-2 hover:cursor-pointer bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg hover:from-pink-600 hover:to-purple-600 transition-colors flex items-center justify-center"
           onClick={handleScanWithAI}
           disabled={isLoading}
         >
@@ -176,6 +181,7 @@ const TransactionForm = () => {
             </>
           )}
         </button>
+        <p className="text-gray-600 text-sm mb-5">*Note: The file size should not exceed 5MB.</p>
 
         <div className="mb-4">
           <label htmlFor='type' className="block text-black mb-3">Type</label>
@@ -193,7 +199,7 @@ const TransactionForm = () => {
 
         <div className="flex gap-4 mb-4">
           <div className="flex-1">
-            <label className="block text-black mb-3">Amount
+            <label className="block text-black">Amount
               <input
                 type="number"
                 name="transaction[amount]"
