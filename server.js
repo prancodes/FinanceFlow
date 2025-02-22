@@ -60,6 +60,7 @@ import homeRoutes from './routes/home.js';
 import authRoutes from './routes/auth.js';
 import dashboardRoutes from './routes/dashboard.js';
 import transactionRoutes from './routes/transactions.js';
+import analyticsRoutes from './routes/analytics.js'
 
 // Cached production assets
 const templateHtml = isProduction
@@ -89,6 +90,7 @@ app.use('/api', homeRoutes);
 app.use('/api', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/dashboard/:accountId', transactionRoutes);
+app.use('/api/dashboard/:accountId', analyticsRoutes);
 
 // Serve HTML
 app.use('*all', async (req, res) => {
