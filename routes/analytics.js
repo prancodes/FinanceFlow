@@ -7,43 +7,41 @@ const router = express.Router({ mergeParams: true });
 
 router.get("/analytics", async (req, res, next) => {
   const { accountId } = req.params;
-  const account = await Account.findById(accountId);
+
   try {
-    // Fetch user's accounts and transactions
-    const user = await User.findById(account.user).populate({
-      path: "accounts",
-      populate: {
-        path: "transactions",
-        match: { type: "Expense" }, // Only fetch expense transactions
-      },
+    // Fetch the account by accountId
+    const account = await Account.findById(accountId).populate({
+      path: "transactions",
+      match: { type: "Expense" }, // Only fetch expense transactions
     });
+
+    if (!account) {
+      throw new CustomError(404, "Account not found.");
+    }
+
+    // Fetch the user associated with the account
+    const user = await User.findById(account.user);
 
     if (!user) {
       throw new CustomError(404, "User not found.");
     }
 
-    // Calculate total expenses by category
+    // Calculate total expenses by category for the specific account
     const expensesByCategory = {
       Food: 0,
       Transport: 0,
       Entertainment: 0,
     };
 
-    user.accounts.forEach((account) => {
-      account.transactions.forEach((transaction) => {
-        if (transaction.category in expensesByCategory) {
-          expensesByCategory[transaction.category] += parseFloat(
-            transaction.amount.toString()
-          );
-        }
-      });
+    account.transactions.forEach((transaction) => {
+      if (transaction.category in expensesByCategory) {
+        expensesByCategory[transaction.category] += parseFloat(transaction.amount.toString());
+      }
     });
 
-    // Get initialBalance and current balance
-    const initialBalance = parseFloat(
-      user.accounts[0].initialBalance.toString()
-    );
-    const currentBalance = parseFloat(user.accounts[0].balance.toString());
+    // Get initialBalance and current balance for the specific account
+    const initialBalance = parseFloat(account.initialBalance.toString());
+    const currentBalance = parseFloat(account.balance.toString());
 
     // Calculate monthly spending trend (example)
     const monthlySpending = {
