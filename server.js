@@ -30,14 +30,13 @@ const base = process.env.BASE || '/'
 // Create Express app
 const app = express();
 
-// --- Middleware Setup ---
+// Middleware setup
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(process.cwd(), "public")));
 
-
-// --- Session Configuration ---
+// Session configuration
 const store = MongoStore.create({
   mongoUrl: MONGO_URL,
   crypto: { secret: process.env.SESSION_SECRET },
@@ -59,8 +58,7 @@ const sessionOptions = {
 };
 app.use(session(sessionOptions));
 
-
-// Import your models
+// Import models
 import { User } from './models/User.model.js';
 import { Transaction } from './models/Transaction.model.js';
 import { Account } from './models/Account.model.js';
@@ -91,40 +89,38 @@ if (!isProduction) {
   app.use(base, sirv('./dist/client', { extensions: [] }))
 }
 
+// API Routes
 
-// --------------------- API Routes ------------------
-
-// Correct the root route to serve the index page
-app.get("/", (req, res) => {
-  res.redirect("/home");
+// Serve the index page
+app.get("/api/home", (req, res) => {
+  res.redirect("/");
 });
 
-// Correct the signup route to serve the signup page
-app.get("/signup", (req, res) => {
+// Serve the signup page
+app.get("/api/signup", (req, res) => {
   res.redirect("/signup");
 });
 
-// Correct the login route to serve the login page
-app.get("/login", (req, res) => {
+// Serve the login page
+app.get("/api/login", (req, res) => {
   res.redirect("/login");
 });
 
-// GET Route: Render the Create Account form
-app.get("/dashboard/addAccount", isLoggedIn, (req, res) => {
+// Render the Create Account form
+app.get("/api/dashboard/addAccount", isLoggedIn, (req, res) => {
   res.redirect("/dashboard/addAccount");
 });
 
-// GET Route: Render the Transaction Form
-app.get("/dashboard/:accountId/createTransaction", (req, res) => {
+// Render the Transaction Form
+app.get("/api/dashboard/:accountId/createTransaction", (req, res) => {
   const { accountId } = req.params;
   res.redirect(`/dashboard/${accountId}/createTransaction`);
 });
 
-// POST Route: Signup
+// Signup route
 app.post("/signup", async (req, res, next) => {
   const { name, email, password } = req.body.user;
   try {
-    // Check if the email already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       throw new CustomError(400, "Email already Exists");
@@ -139,7 +135,7 @@ app.post("/signup", async (req, res, next) => {
 
     req.session.userId = createdUser._id;
 
-    // Generate JWT token and set it in a cookie
+// Generate JWT token and set it in a cookie
     jwt.sign({ userId: createdUser._id, name }, jwtSecret, {}, (err, token) => {
       if (err) {
         console.error("JWT Error:", err);
@@ -153,7 +149,7 @@ app.post("/signup", async (req, res, next) => {
   }
 });
 
-// POST Route: Login
+// Login route
 app.post("/login", async (req, res, next) => {
   const { email, password } = req.body.login;
   try {
@@ -164,7 +160,6 @@ app.post("/login", async (req, res, next) => {
 
     const correctPass = await bcrypt.compare(password, findUser.password);
     if (correctPass) {
-      // Save user info in the session
       req.session.userId = findUser._id;
       jwt.sign({ userId: findUser._id, name: findUser.name }, jwtSecret, {}, (err, token) => {
         if (err) {
@@ -182,8 +177,8 @@ app.post("/login", async (req, res, next) => {
   }
 });
 
-// Route to display dashboard with user info and accounts
-app.get("/dashboard", isLoggedIn, async (req, res, next) => {
+// Display dashboard with user info and accounts
+app.get("/api/dashboard", isLoggedIn, async (req, res, next) => {
   try {
     const userId = req.session.userId;
     if (!userId) return res.status(401).json({ message: 'User not authenticated' });
@@ -204,7 +199,7 @@ app.get("/dashboard", isLoggedIn, async (req, res, next) => {
 });
 
 // Render the selected Account related info
-app.get("/dashboard/:accountId", async (req, res, next) => {
+app.get("/api/dashboard/:accountId", async (req, res, next) => {
   try {
     const userId = req.session.userId;
     if (!userId) return res.status(401).json({ message: 'User not authenticated' });
@@ -230,22 +225,20 @@ app.get("/dashboard/:accountId", async (req, res, next) => {
   }
 });
 
-// Route to create account
+// Create account route
 app.post("/dashboard/addAccount", async (req, res, next) => {
   try {
-    // Extract user ID from session for verification
     const userId = req.session.userId;
     if (!userId) {
       throw new CustomError(401, "User not authenticated.");
     }
 
     const { name, type, balance } = req.body.account;
-    // Validate account type
+// Validate account type
     if (!["Current", "Savings"].includes(type)) {
       throw new CustomError(400, "Invalid account type.");
     }
 
-    // Create account with user ID from session
     const newAccount = new Account({
       name,
       type,
@@ -263,7 +256,7 @@ app.post("/dashboard/addAccount", async (req, res, next) => {
   }
 });
 
-// POST route to add Transaction
+// Add transaction route
 app.post("/dashboard/:accountId", async (req, res, next) => {
   console.log("Received Data:", req.body);
   try {
@@ -275,7 +268,7 @@ app.post("/dashboard/:accountId", async (req, res, next) => {
 
     const data = req.body.transaction;
 
-    // Validate and convert the amount
+// Validate and convert the amount
     if (!data.amount || data.amount === "") {
       throw new CustomError(400, "Invalid amount.");
     }
@@ -291,7 +284,7 @@ app.post("/dashboard/:accountId", async (req, res, next) => {
       throw new CustomError(400, "Invalid amount.");
     }
 
-    // Combine the provided date with the current time
+// Combine the provided date with the current time
     const transactionDate = new Date(data.date);
     const currentTime = new Date();
     transactionDate.setHours(
@@ -309,7 +302,7 @@ app.post("/dashboard/:accountId", async (req, res, next) => {
       date: transactionDate,
       description: data.description,
       isRecurring: data.isRecurring,
-      recurringInterval: data.recurringInterval ? data.recurringInterval.toUpperCase() : null,
+      recurringInterval: data.recurringInterval || null,
     });
 
     const savedTransaction = await newTransaction.save();
@@ -367,17 +360,14 @@ app.post("/dashboard/:accountId", async (req, res, next) => {
       console.error("Error creating Budget", error);
     }
 
-    // Redirect to the account details page after creating the transaction
     res.redirect(`/dashboard/${accountId}`);
   } catch (error) {
     next(error);
   }
 });
 
-// ------------------------- Transaction Routes -----------------------------
-
-// GET Route: Render Transaction Edit Form
-app.get("/dashboard/:accountId/transaction/:transactionId/edit", async (req, res, next) => {
+// Render Transaction Edit Form
+app.get("/api/dashboard/:accountId/transaction/:transactionId/edit", async (req, res, next) => {
   const { accountId, transactionId } = req.params;
   try {
     const userId = req.session.userId;
@@ -398,30 +388,29 @@ app.get("/dashboard/:accountId/transaction/:transactionId/edit", async (req, res
   }
 });
 
-// PUT Route: Update transaction data and store in Database
+// Update transaction data and store in Database
 app.put("/dashboard/:accountId/transaction/:transactionId", async (req, res, next) => {
   const { accountId, transactionId } = req.params;
   const { type, amount, category, date, description, isRecurring, recurringInterval } = req.body.transaction;
   try {
-    // Fetch the old transaction before updating it
     const oldTransaction = await Transaction.findById(transactionId);
     if (!oldTransaction) {
       throw new CustomError(404, "Transaction not found");
     }
 
-    // Fetch the account associated with the transaction
+// Fetch the account associated with the transaction
     const account = await Account.findById(accountId);
     if (!account) {
       throw new CustomError(404, "Account not found");
     }
 
-    // Fetch the budget associated with the user
+// Fetch the budget associated with the user
     const budget = await Budget.findOne({ user: account.user });
     if (!budget) {
       throw new CustomError(404, "Budget not found");
     }
 
-    // Revert the old transaction's impact on the account balance and budget
+// Revert the old transaction's impact on the account balance and budget
     const oldAmount = parseFloat(oldTransaction.amount.toString());
     if (oldTransaction.type === "Expense") {
       account.balance = mongoose.Types.Decimal128.fromString(
@@ -448,7 +437,6 @@ app.put("/dashboard/:accountId/transaction/:transactionId", async (req, res, nex
       );
     }
 
-    // Update the transaction with the new data
     const updatedTransaction = await Transaction.findByIdAndUpdate(
       transactionId,
       {
@@ -466,7 +454,7 @@ app.put("/dashboard/:accountId/transaction/:transactionId", async (req, res, nex
       throw new CustomError(404, "Transaction not found");
     }
 
-    // Apply the new transaction's impact on the account balance and budget
+// Apply the new transaction's impact on the account balance and budget
     const newAmount = parseFloat(amount);
     if (type === "Expense") {
       account.balance = mongoose.Types.Decimal128.fromString(
@@ -493,11 +481,10 @@ app.put("/dashboard/:accountId/transaction/:transactionId", async (req, res, nex
       );
     }
 
-    // Save the updated account balance and budget
+// Save the updated account balance and budget
     await account.save();
     await budget.save();
 
-    // Redirect to the account details page after updating the transaction
     res.redirect(`/dashboard/${accountId}`);
   } catch (err) {
     console.error("Error updating transaction:", err);
@@ -581,7 +568,6 @@ app.use('*all', async (req, res) => {
     /** @type {import('./src/entry-server.js').render} */
     let render
     if (!isProduction) {
-      // Always read fresh template in development
       template = await fs.readFile('./index.html', 'utf-8')
       template = await vite.transformIndexHtml(url, template)
       render = (await vite.ssrLoadModule('/src/entry-server.jsx')).render
@@ -604,7 +590,7 @@ app.use('*all', async (req, res) => {
   }
 })
 
-// Start http server
+// Start HTTP server
 app.listen(port, () => {
   console.log(`Server started at http://localhost:${port}`)
 })

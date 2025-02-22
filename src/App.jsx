@@ -34,7 +34,7 @@ const App = ({ location }) => {
       <div className="min-h-screen bg-gray-100 flex flex-col">
         <main className="flex-grow p-4">
           <Routes>
-            <Route path="/home" element={<Home />} />
+            <Route path="/" element={<Home />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/addAccount" element={<CreateAccForm />} />
             <Route path="/dashboard/:accountId/createTransaction" element={<TransactionForm />} />
