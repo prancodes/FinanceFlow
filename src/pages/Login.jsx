@@ -11,7 +11,7 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch('/login', {
+      const response = await fetch('/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -36,7 +36,7 @@ const Login = () => {
 
   return (
     <div>
-      <link rel="stylesheet" href="/styles/tailwind.css" />
+ 
       <form onSubmit={handleSubmit} className="max-w-sm mx-auto mt-10 p-6">
         <h2 className="text-center text-xl sm:text-2xl font-semibold text-gray-700 mb-6">
           FinanceFlow

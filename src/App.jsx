@@ -10,6 +10,8 @@ import Analytics from './components/Analytics';
 import Home from './pages/Home';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
+import Navbar from './layouts/Navbar';
+import Footer from './layouts/Footer';
 
 const App = ({ location }) => {
   const [Router, setRouter] = useState(null);
@@ -32,7 +34,8 @@ const App = ({ location }) => {
   return (
     <Router location={location}>
       <div className="min-h-screen bg-gray-100 flex flex-col">
-        <main className="flex-grow p-4">
+        <Navbar />
+        <main className="flex-grow p-4 mt-12">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/dashboard" element={<Dashboard />} />
@@ -46,9 +49,7 @@ const App = ({ location }) => {
             <Route path="*" element={<h1 className="text-red-500 text-center">404: Page Not Found</h1>} />
           </Routes>
         </main>
-        <footer className="text-center py-4 bg-blue-600 text-white">
-          <p>&copy; 2025 FinanceFlow. All rights reserved.</p>
-        </footer>
+        <Footer/>
       </div>
     </Router>
   );

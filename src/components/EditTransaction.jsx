@@ -44,7 +44,7 @@ const EditTransaction = () => {
         amount: parseFloat(transaction.amount),
       };
 
-      const response = await fetch(`/dashboard/${accountId}/transaction/${transactionId}`, {
+      const response = await fetch(`/api/dashboard/${accountId}/transaction/${transactionId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -64,7 +64,7 @@ const EditTransaction = () => {
 
   return (
     <div>
-      <link rel="stylesheet" href="/styles/tailwind.css" />
+ 
       <form
         onSubmit={handleSubmit}
         className="max-w-2xl mx-auto mt-3 p-6 bg-white rounded-xl"
