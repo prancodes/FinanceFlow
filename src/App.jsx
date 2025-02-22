@@ -35,7 +35,7 @@ const App = ({ location }) => {
     <Router location={location}>
       <div className="min-h-screen bg-gray-100 flex flex-col">
         <Navbar />
-        <main className="flex-grow p-4">
+        <main className="flex-grow p-4 mt-12">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/dashboard" element={<Dashboard />} />
