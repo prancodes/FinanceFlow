@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ErrorMessage from '../components/ErrorMessage';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -55,11 +56,7 @@ const Signup = () => {
             Create New Account
           </h3>
 
-          {error && (
-            <p className="text-center text-red-500 mb-4">
-              {error}
-            </p>
-          )}
+          <ErrorMessage message={error} onClose={() => setError('')} />
 
           <form onSubmit={handleSubmit}>
             <div className="mb-4">

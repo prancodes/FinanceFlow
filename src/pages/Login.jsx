@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ErrorMessage from '../components/ErrorMessage';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -36,7 +37,6 @@ const Login = () => {
 
   return (
     <div>
- 
       <form onSubmit={handleSubmit} className="max-w-sm mx-auto mt-10 p-6">
         <h2 className="text-center text-xl sm:text-2xl font-semibold text-gray-700 mb-6">
           FinanceFlow
@@ -44,11 +44,7 @@ const Login = () => {
         <h3 className="text-center text-lg sm:text-xl font-medium text-gray-600 mb-4">
           Login
         </h3>
-        {error && (
-          <p className="text-center text-red-500 mb-4">
-            {error}
-          </p>
-        )}
+        <ErrorMessage message={error} onClose={() => setError('')} />
         <div className="mb-4">
           <label htmlFor="email" className="block text-gray-700">
             Email
