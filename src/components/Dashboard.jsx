@@ -7,7 +7,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('/dashboard');
+        const response = await fetch('/api/dashboard');
         const data = await response.json();
         setUserData(data);
       } catch (error) {
