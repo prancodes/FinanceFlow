@@ -1,11 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const CreateAccForm = () => {
   const [name, setName] = useState('');
   const [type, setType] = useState('');
   const [balance, setBalance] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/checkAuth');
+        if (response.status === 200) {
+          setIsAuthenticated(true);
+        } else {
+          navigate('/login');
+        }
+      } catch (error) {
+        navigate('/login');
+      }
+    };
+
+    checkAuth();
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,6 +47,10 @@ const CreateAccForm = () => {
       console.error('Error creating account:', error);
     }
   };
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <div>

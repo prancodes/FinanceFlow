@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Tesseract from 'tesseract.js';
 
@@ -12,7 +12,25 @@ const TransactionForm = () => {
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurringInterval, setRecurringInterval] = useState("Daily");
   const [receiptFile, setReceiptFile] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/checkAuth');
+        if (response.status === 200) {
+          setIsAuthenticated(true);
+        } else {
+          navigate('/login');
+        }
+      } catch (error) {
+        navigate('/login');
+      }
+    };
+
+    checkAuth();
+  }, [navigate]);
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -70,6 +88,10 @@ const TransactionForm = () => {
       console.error('Error creating transaction:', error);
     }
   };
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <div>

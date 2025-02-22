@@ -1,14 +1,33 @@
 // src/components/AccountDetails.jsx
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+
 const AccountDetail = () => {
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const { accountId } = useParams();
   const [account, setAccount] = useState({ name: '', type: '', balance: 0, transactions: [] });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   const handleViewAnalytics = () => {
     navigate(`/dashboard/${accountId}/analytics`); // Navigate to the analytics page
   };
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/checkAuth');
+        if (response.status === 200) {
+          setIsAuthenticated(true);
+        } else {
+          navigate('/login');
+        }
+      } catch (error) {
+        navigate('/login');
+      }
+    };
+
+    checkAuth();
+  }, [navigate]);
 
   useEffect(() => {
     const fetchAccountData = async () => {
@@ -24,6 +43,10 @@ const AccountDetail = () => {
     fetchAccountData();
   }, [accountId]);
 
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
@@ -31,19 +54,19 @@ const AccountDetail = () => {
           {account.name} Account Details
         </h1>
         <div className='flex items-center justify-center'>
-        <button 
+          <button 
             type="button" 
             className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mb-5"
             onClick={handleViewAnalytics}
           >
             View Analytics
           </button>
-          </div>
+        </div>
         <p className="text-lg text-gray-700 mb-4">
           <strong>Type:</strong> {account.type}
         </p>
         <p className="text-lg text-gray-700 mb-4">
-          <strong>InitialBalance:</strong> ${Number(account.initialBalance).toFixed(2)}
+          <strong>Initial Balance:</strong> ${Number(account.initialBalance).toFixed(2)}
         </p>
         <p className="text-lg text-gray-700 mb-4">
           <strong>Balance:</strong> ${Number(account.balance).toFixed(2)}

@@ -81,4 +81,14 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
+
+// Check authentication status
+router.get('/checkAuth', (req, res) => {
+  if (req.session.userId) {
+    res.status(200).json({ authenticated: true });
+  } else {
+    res.status(401).json({ authenticated: false });
+  }
+});
+
 export default router;
