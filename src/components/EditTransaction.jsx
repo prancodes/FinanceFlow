@@ -12,7 +12,25 @@ const EditTransaction = () => {
     isRecurring: false,
     recurringInterval: "",
   });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/checkAuth');
+        if (response.status === 200) {
+          setIsAuthenticated(true);
+        } else {
+          navigate('/login');
+        }
+      } catch (error) {
+        navigate('/login');
+      }
+    };
+
+    checkAuth();
+  }, [navigate]);
 
   useEffect(() => {
     const fetchTransactionData = async () => {
@@ -62,9 +80,12 @@ const EditTransaction = () => {
     }
   };
 
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <div>
- 
       <form
         onSubmit={handleSubmit}
         className="max-w-2xl mx-auto mt-3 p-6 bg-white rounded-xl"

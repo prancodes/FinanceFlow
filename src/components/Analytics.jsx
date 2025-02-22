@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Bar, Line, Pie } from "react-chartjs-2";
 import axios from "axios";
 import {
@@ -30,24 +30,45 @@ ChartJS.register(
 
 const Analytics = ({ userId }) => {
   const { accountId } = useParams();
+  const navigate = useNavigate();
   const [data, setData] = useState({
     initialBalance: 0,
     currentBalance: 0,
     expensesByCategory: {},
     monthlySpending: {},
   });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // Fetch analytics data from the backend
-    axios.get(`/api/dashboard/${accountId}/analytics`)
-      .then((response) => {
-        console.log("Analytics Data:", response.data); // Debugging
-        setData(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching analytics data:", error);
-      });
-  }, [accountId]);
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/checkAuth');
+        if (response.status === 200) {
+          setIsAuthenticated(true);
+        } else {
+          navigate('/login');
+        }
+      } catch (error) {
+        navigate('/login');
+      }
+    };
+
+    checkAuth();
+  }, [navigate]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      // Fetch analytics data from the backend
+      axios.get(`/api/dashboard/${accountId}/analytics`)
+        .then((response) => {
+          console.log("Analytics Data:", response.data); // Debugging
+          setData(response.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching analytics data:", error);
+        });
+    }
+  }, [accountId, isAuthenticated]);
 
   // Data for the Bar Chart (Expenses by Category)
   const barChartData = {
@@ -103,6 +124,10 @@ const Analytics = ({ userId }) => {
     responsive: true,
     maintainAspectRatio: false, // Disable aspect ratio to control height and width
   };
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">

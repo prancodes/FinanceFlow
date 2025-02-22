@@ -34,7 +34,7 @@ router.get("/", isLoggedIn, async (req, res, next) => {
 });
 
 // Render the selected Account related info
-router.get("/:accountId", async (req, res, next) => {
+router.get("/:accountId", isLoggedIn, async (req, res, next) => {
   try {
     const userId = req.session.userId;
     if (!userId) return res.status(401).json({ message: 'User not authenticated' });
@@ -61,7 +61,7 @@ router.get("/:accountId", async (req, res, next) => {
 });
 
 // Create account route
-router.post("/addAccount", async (req, res, next) => {
+router.post("/addAccount", isLoggedIn, async (req, res, next) => {
   try {
     const userId = req.session.userId;
     if (!userId) {
