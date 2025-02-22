@@ -1,10 +1,14 @@
 // src/components/AccountDetails.jsx
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-
+import { useNavigate } from 'react-router-dom';
 const AccountDetail = () => {
+  const navigate=useNavigate();
   const { accountId } = useParams();
   const [account, setAccount] = useState({ name: '', type: '', balance: 0, transactions: [] });
+  const handleViewAnalytics = () => {
+    navigate(`/dashboard/${accountId}/analytics`); // Navigate to the analytics page
+  };
 
   useEffect(() => {
     const fetchAccountData = async () => {
@@ -26,6 +30,13 @@ const AccountDetail = () => {
         <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
           {account.name} Account Details
         </h1>
+        <button 
+            type="button" 
+            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+            onClick={handleViewAnalytics}
+          >
+            View Analytics
+          </button>
         <p className="text-lg text-gray-700 mb-4">
           <strong>Type:</strong> {account.type}
         </p>
