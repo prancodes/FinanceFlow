@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { Bar, Line, Pie } from "react-chartjs-2";
 import axios from "axios";
 import {
@@ -28,6 +29,7 @@ ChartJS.register(
 );
 
 const Analytics = ({ userId }) => {
+  const { accountId } = useParams();
   const [data, setData] = useState({
     initialBalance: 0,
     currentBalance: 0,
@@ -37,7 +39,8 @@ const Analytics = ({ userId }) => {
 
   useEffect(() => {
     // Fetch analytics data from the backend
-    axios.get(`/dashboard/${userId}/analytics`)
+    axios
+      .get(`/dashboard/${accountId}/analytics`)
       .then((response) => {
         console.log("Analytics Data:", response.data); // Debugging
         setData(response.data);
@@ -45,7 +48,7 @@ const Analytics = ({ userId }) => {
       .catch((error) => {
         console.error("Error fetching analytics data:", error);
       });
-  }, [userId]);
+  }, [accountId]);
 
   // Data for the Bar Chart (Expenses by Category)
   const barChartData = {
@@ -96,32 +99,49 @@ const Analytics = ({ userId }) => {
     ],
   };
 
+  // Chart options to control responsiveness and size
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false, // Disable aspect ratio to control height and width
+  };
+
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">Expense Analytics</h2>
 
-      {/* Expenses by Category (Bar Chart) */}
-      <div className="mb-8">
-        <h3 className="text-xl font-semibold mb-2">Expenses by Category</h3>
-        <Bar data={barChartData} />
-      </div>
+      {/* Expenses by Category (Bar Chart) and Balance Overview (Line Chart) */}
+      <div className="flex flex-col md:flex-row md:gap-8">
+        {/* Bar Chart */}
+        <div className="mb-8 md:flex-1"> 
+          <h3 className="text-xl font-semibold mb-2">Expenses by Category</h3>
+          <div className="w-full h-96"> 
+            <Bar data={barChartData} options={chartOptions} />
+          </div>
+        </div>
 
-      {/* Initial Balance vs Current Balance (Line Chart) */}
-      <div className="mb-8">
-        <h3 className="text-xl font-semibold mb-2">Balance Overview</h3>
-        <Line data={lineChartData} />
+        {/* Line Chart */}
+        <div className="mb-8 md:flex-1"> 
+          <h3 className="text-xl font-semibold mb-2">Balance Overview</h3>
+          <div className="w-full h-96"> 
+            <Line data={lineChartData} options={chartOptions} />
+          </div>
+        </div>
       </div>
 
       {/* Expense Distribution (Pie Chart) */}
       <div className="mb-8">
         <h3 className="text-xl font-semibold mb-2">Expense Distribution</h3>
-        <Pie data={pieChartData} />
+        <div className="w-full h-96"> 
+          <Pie data={pieChartData} options={chartOptions} />
+        </div>
       </div>
 
       {/* Monthly Spending Trend (Line Chart) */}
       <div>
         <h3 className="text-xl font-semibold mb-2">Monthly Spending Trend</h3>
-        <Line data={monthlySpendingData} />
+        <div className="w-full h-96"> 
+          <Line data={monthlySpendingData} options={chartOptions} />
+        </div>
       </div>
     </div>
   );
