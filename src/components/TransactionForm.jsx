@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState,useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Tesseract from 'tesseract.js';
 
@@ -14,7 +14,6 @@ const TransactionForm = () => {
   const [receiptFile, setReceiptFile] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
-
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -75,7 +74,17 @@ const TransactionForm = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          transaction: { type, amount, category, date, description, isRecurring, recurringInterval, account: accountId },
+          transaction: { 
+          type,
+          amount,
+          category, 
+          date,
+          description, 
+          isRecurring,
+          // Set the recurring interval only if it is isRecurring 
+          recurringInterval:isRecurring? recurringInterval : null,
+          account: accountId 
+        },
         }),
       });
 
@@ -88,7 +97,6 @@ const TransactionForm = () => {
       console.error('Error creating transaction:', error);
     }
   };
-
   if (!isAuthenticated) {
     return null;
   }
