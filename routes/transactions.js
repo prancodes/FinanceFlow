@@ -51,7 +51,33 @@ router.post("/transaction", async (req, res, next) => {
       currentTime.getSeconds(),
       currentTime.getMilliseconds()
     );
+  //First Set the next Recurring Date to null
+  //Check if the transaction is recurring 
+  //If no then move ahead else set the next Recurring Date to the transaction Date First
+  //Then Based on recurringInterval keep settign the nextRecurringDate
+  let nextRecurringDate=null;
+  if(data.isRecurring){
+    nextRecurringDate=new Date(transactionDate);
+    switch(data.recurringInterval){
+      case "Daily":
+        nextRecurringDate.setDate(nextRecurringDate.getDate() +1);
+        break;
+      
+      case "Weekly":
+        nextRecurringDate.setDate(nextRecurringDate.getDate()+7);
+        break;
 
+      case "Monthly":
+        nextRecurringDate.setMonth(nextRecurringDate.getMonth()+1) ;
+        break;
+
+      case "Yearly":
+        nextRecurringDate.setFullYear(nextRecurringDate.getFullYear()+1) ;
+        break;
+      default:
+        break;
+  }
+}
     const newTransaction = new Transaction({
       type: data.type,
       amount: data.amount,
@@ -61,6 +87,7 @@ router.post("/transaction", async (req, res, next) => {
       description: data.description,
       isRecurring: data.isRecurring,
       recurringInterval: data.recurringInterval || null,
+      nextRecurringDate: nextRecurringDate,
     });
 
     const savedTransaction = await newTransaction.save();
@@ -122,6 +149,7 @@ router.post("/transaction", async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+
 });
 
 // Render Transaction Edit Form
@@ -194,6 +222,27 @@ router.put("/transaction/:transactionId", async (req, res, next) => {
         (parseFloat(budget.amount.toString()) - oldAmount).toString()
       );
     }
+    let nextRecurringDate = null;
+    if (isRecurring === "on" || isRecurring === true) {
+      const transactionDate = new Date(date);
+      nextRecurringDate = new Date(transactionDate);
+      switch (recurringInterval) {
+        case "Daily":
+          nextRecurringDate.setDate(nextRecurringDate.getDate() + 1);
+          break;
+        case "Weekly":
+          nextRecurringDate.setDate(nextRecurringDate.getDate() + 7);
+          break;
+        case "Monthly":
+          nextRecurringDate.setMonth(nextRecurringDate.getMonth() + 1);
+          break;
+        case "Yearly":
+          nextRecurringDate.setFullYear(nextRecurringDate.getFullYear() + 1);
+          break;
+        default:
+          break;
+      }
+    }
 
     const updatedTransaction = await Transaction.findByIdAndUpdate(
       transactionId,
@@ -205,6 +254,7 @@ router.put("/transaction/:transactionId", async (req, res, next) => {
         description,
         isRecurring: isRecurring === "on" || isRecurring === true,
         recurringInterval: (isRecurring === "on" || isRecurring === true) ? recurringInterval : null,
+        nextRecurringDate: nextRecurringDate,
       },
       { new: true, runValidators: true }
     );
