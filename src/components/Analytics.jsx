@@ -16,7 +16,6 @@ import {
   Legend,
 } from "chart.js";
 
-// Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -29,7 +28,7 @@ ChartJS.register(
   Legend
 );
 
-const Analytics = ({ userId }) => {
+const Analytics = () => {
   const { accountId } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState({
@@ -40,12 +39,14 @@ const Analytics = ({ userId }) => {
   });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState("");
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [availableYears, setAvailableYears] = useState([]);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const response = await fetch('/api/checkAuth');
-        if (response.status === 200) {
+        if (response.ok) {
           setIsAuthenticated(true);
         } else {
           navigate('/login');
@@ -55,117 +56,142 @@ const Analytics = ({ userId }) => {
         navigate('/login');
       }
     };
-
     checkAuth();
   }, [navigate]);
 
   useEffect(() => {
     if (isAuthenticated) {
-      axios.get(`/api/dashboard/${accountId}/analytics`)
-        .then((response) => {
-          setData(response.data);
-        })
-        .catch((error) => {
-          setError("Error fetching analytics data.");
-        });
+      fetchAvailableYears();
+      fetchAnalyticsData();
     }
   }, [accountId, isAuthenticated]);
 
-  // Data for the Bar Chart (Expenses by Category)
+  useEffect(() => {
+    if (isAuthenticated && selectedYear) {
+      fetchAnalyticsData();
+    }
+  }, [selectedYear]);
+
+  const fetchAvailableYears = async () => {
+    try {
+      const response = await axios.get(`/api/dashboard/${accountId}/available-years`);
+      setAvailableYears(response.data.years);
+      if (response.data.years.length > 0) {
+        setSelectedYear(response.data.years[0]); // Set the latest year as default
+      }
+    } catch (error) {
+      setError("Error fetching available years.");
+    }
+  };
+
+  const fetchAnalyticsData = async () => {
+    try {
+      const response = await axios.get(`/api/dashboard/${accountId}/analytics`, {
+        params: { year: selectedYear },
+      });
+      setData(response.data);
+    } catch (error) {
+      setError("Error fetching analytics data.");
+    }
+  };
+
+  const CHART_COLORS = ["#FF6384", "#36A2EB", "#FFCE56", "#9966FF"];
+
+  // Bar Chart data configurations
   const barChartData = {
     labels: Object.keys(data.expensesByCategory),
-    datasets: [
-      {
-        label: "Expenses by Category",
-        data: Object.values(data.expensesByCategory),
-        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
-      },
-    ],
+    datasets: [{
+      label: "Expenses by Category",
+      data: Object.values(data.expensesByCategory),
+      backgroundColor: CHART_COLORS,
+    }]
   };
 
-  // Data for the Line Chart (Initial Balance vs Current Balance)
   const lineChartData = {
     labels: ["Initial Balance", "Current Balance"],
-    datasets: [
-      {
-        label: "Balance",
-        data: [data.initialBalance, data.currentBalance],
-        borderColor: "#4BC0C0",
-        fill: false,
-      },
-    ],
+    datasets: [{
+      label: "Balance",
+      data: [data.initialBalance, data.currentBalance],
+      borderColor: "#4BC0C0",
+      fill: false,
+    }]
   };
 
-  // Data for the Pie Chart (Expense Distribution)
+  // For pie chart
   const pieChartData = {
     labels: Object.keys(data.expensesByCategory),
-    datasets: [
-      {
-        data: Object.values(data.expensesByCategory),
-        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
-      },
-    ],
+    datasets: [{
+      data: Object.values(data.expensesByCategory),
+      backgroundColor: CHART_COLORS,
+    }]
   };
 
-  // Data for the Monthly Spending Trend (Line Chart)
   const monthlySpendingData = {
-    labels: Object.keys(data.monthlySpending),
-    datasets: [
-      {
-        label: "Monthly Spending",
-        data: Object.values(data.monthlySpending),
-        borderColor: "#FF6384",
-        fill: false,
-      },
+    labels: [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
     ],
+    datasets: [{
+      label: "Monthly Spending",
+      data: Object.values(data.monthlySpending),
+      borderColor: "#FF6384",
+      fill: false,
+    }]
   };
 
-  // Chart options to control responsiveness and size
   const chartOptions = {
     responsive: true,
-    maintainAspectRatio: false, // Disable aspect ratio to control height and width
+    maintainAspectRatio: false,
   };
 
-  if (!isAuthenticated) {
-    return null;
-  }
+  if (!isAuthenticated) return null;
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md">
+    <div className="p-6 bg-white rounded-lg shadow-md space-y-8">
       <ErrorMessage message={error} onClose={() => setError('')} />
-      <h2 className="text-2xl font-bold mb-4 cursor-pointer">Expense Analytics</h2>
+      <h1 className="text-3xl font-bold text-gray-800">Financial Analytics</h1>
 
-      {/* Expenses by Category (Bar Chart) and Balance Overview (Line Chart) */}
+      {/* Year Selector */}
+      <div className="mb-6 flex items-center gap-4">
+        <label className="text-lg font-semibold">Select Year:</label>
+        <select
+          value={selectedYear}
+          onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+          className="p-2 border rounded"
+        >
+          {availableYears.map(year => (
+            <option key={year} value={year}>{year}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Original Chart Structure */}
       <div className="flex flex-col md:flex-row md:gap-8">
-        {/* Bar Chart */}
-        <div className="mb-8 md:flex-1"> 
-          <h3 className="text-xl font-semibold mb-2 cursor-pointer">Expenses by Category</h3>
-          <div className="w-full h-96"> 
+        <div className="mb-8 md:flex-1">
+          <h3 className="text-xl font-semibold mb-2">Expenses by Category</h3>
+          <div className="w-full h-96">
             <Bar data={barChartData} options={chartOptions} />
           </div>
         </div>
 
-        {/* Line Chart */}
-        <div className="mb-8 md:flex-1"> 
-          <h3 className="text-xl font-semibold mb-2 cursor-pointer">Balance Overview</h3>
-          <div className="w-full h-96"> 
+        <div className="mb-8 md:flex-1">
+          <h3 className="text-xl font-semibold mb-2">Balance Overview</h3>
+          <div className="w-full h-96">
             <Line data={lineChartData} options={chartOptions} />
           </div>
         </div>
       </div>
 
-      {/* Expense Distribution (Pie Chart) */}
       <div className="mb-8">
-        <h3 className="text-xl font-semibold mb-2 cursor-pointer">Expense Distribution</h3>
-        <div className="w-full h-96"> 
+        <h3 className="text-xl font-semibold mb-2">Expense Distribution</h3>
+        <div className="w-full h-96">
           <Pie data={pieChartData} options={chartOptions} />
         </div>
       </div>
 
-      {/* Monthly Spending Trend (Line Chart) */}
       <div>
-        <h3 className="text-xl font-semibold mb-2 cursor-pointer">Monthly Spending Trend</h3>
-        <div className="w-full h-96"> 
+        <h3 className="text-xl font-semibold mb-2">Monthly Spending Trend</h3>
+        <div className="w-full h-96">
           <Line data={monthlySpendingData} options={chartOptions} />
         </div>
       </div>

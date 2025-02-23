@@ -3,8 +3,6 @@ if(process.env.NODE_ENV !== "production") {
   dotenv.config();
 }
 import { User } from "../models/User.model.js";
-import { Account } from "../models/Account.model.js";
-import { Transaction } from "../models/Transaction.model.js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import fs from 'fs';
 import handlebars from 'handlebars';
@@ -34,9 +32,9 @@ const fetchUserData=async(userId,startDate,endDate)=>{
         {
             throw new Error("User not found");
         }
-        user.accounts.forEach((account) => {
-          console.log(`Account: ${account._id}, Transactions:`, account.transactions);
-       });
+      //   user.accounts.forEach((account) => {
+      //     console.log(`Account: ${account._id}, Transactions:`, account.transactions);
+      //  });
         const initialBalance = user.accounts.reduce((total, account) => {
             return total + parseFloat(account.initialBalance.toString());
           }, 0);
@@ -142,9 +140,9 @@ const sendMonthlyAlerts=async()=>{
         })
         await sendEmail(user.email,"Monthly Expense Report",emailHtml);
       }
-      console.log("Monthly alerts sent successfully")
+      console.log("Monthly alerts sent successfully");
   } catch (error) {
-    console.error("Error sending alerts",error)
+    console.error("Error sending alerts",error);
   }
 };
 export {sendMonthlyAlerts};

@@ -9,7 +9,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 const router = express.Router();
 const apiKey = process.env.GEMINI_API_KEY;
 
-router.post('/scan-receipt', isLoggedIn,async (req, res, next) => {
+router.post('/scan-receipt', isLoggedIn, async (req, res, next) => {
   const { fileData, fileType } = req.body;
 
   try {
@@ -20,7 +20,7 @@ router.post('/scan-receipt', isLoggedIn,async (req, res, next) => {
     - Total Amount
     - Date (format as YYYY-MM-DD)
     - Description (limit to 10 words)
-    - Category (choose from: Food, Transport, Entertainment)
+    - Category (choose from: Food, Transport, Entertainment, Other. If none match, use 'Other')
     - Type (choose from: Expense, Income)
     - Infer if the transaction is recurring (yes/no). If yes, specify the interval (choose from: Daily, Weekly, Monthly, Yearly).
 
@@ -52,11 +52,17 @@ router.post('/scan-receipt', isLoggedIn,async (req, res, next) => {
     const jsonStartIndex = text.indexOf('{');
     const jsonEndIndex = text.lastIndexOf('}') + 1;
     const jsonString = text.substring(jsonStartIndex, jsonEndIndex);
+    const parsedData = JSON.parse(jsonString);
 
-    res.json({ success: true, data: JSON.parse(jsonString) });
+    // Validate and set default category to "Other" if not in allowed list
+    const allowedCategories = ['Food', 'Transport', 'Entertainment', 'Other'];
+    if (!allowedCategories.includes(parsedData.category)) {
+      parsedData.category = 'Other';
+    }
+
+    res.json({ success: true, data: parsedData });
   } catch (error) {
     next(new CustomError(500, "An error occurred while scanning the receipt."));
   }
 });
-
 export default router;

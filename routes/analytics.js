@@ -2,65 +2,101 @@ import express from "express";
 import CustomError from "../utils/CustomError.js";
 import isLoggedIn from '../middleware/isLoggedIn.js';
 import { Account } from "../models/Account.model.js";
-import { User } from "../models/User.model.js";
 
 const router = express.Router({ mergeParams: true });
 
-router.get("/analytics", isLoggedIn,async (req, res, next) => {
+router.get("/analytics", isLoggedIn, async (req, res, next) => {
+  const { accountId } = req.params;
+  const { year } = req.query; // Get year from query params
+
+  try {
+    // Validate year input
+    const selectedYear = year ? parseInt(year) : new Date().getFullYear();
+    if (isNaN(selectedYear)) {
+      throw new CustomError(400, "Invalid year parameter.");
+    }
+
+    // Define date range for the selected year
+    const startDate = new Date(`${selectedYear}-01-01`);
+    const endDate = new Date(`${selectedYear}-12-31`);
+
+    // Fetch account with transactions filtered by year
+    const account = await Account.findById(accountId).populate({
+      path: "transactions",
+      match: {
+        type: "Expense",
+        date: { $gte: startDate, $lte: endDate }, // Filter by year
+      },
+    });
+
+    if (!account) throw new CustomError(404, "Account not found.");
+
+    // Initialize monthly spending for the selected year
+    const monthlySpending = Array(12).fill(0);
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
+    // Calculate monthly spending
+    account.transactions.forEach((transaction) => {
+      const transactionDate = new Date(transaction.date);
+      const monthIndex = transactionDate.getMonth(); // 0-11
+      monthlySpending[monthIndex] += parseFloat(transaction.amount.toString());
+    });
+
+    // Convert to month-name keyed object
+    const monthlySpendingData = {};
+    monthNames.forEach((month, index) => {
+      monthlySpendingData[month] = monthlySpending[index];
+    });
+
+    // Calculate expenses by category
+    const expensesByCategory = calculateExpensesByCategory(account.transactions);
+
+    res.json({
+      initialBalance: parseFloat(account.initialBalance.toString()),
+      currentBalance: parseFloat(account.balance.toString()),
+      expensesByCategory,
+      monthlySpending: monthlySpendingData,
+      selectedYear, // Return the selected year for frontend display
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Helper function to calculate category expenses
+function calculateExpensesByCategory(transactions) {
+  const categories = transactions.reduce((acc, transaction) => {
+    const category = transaction.category;
+    const amount = parseFloat(transaction.amount.toString());
+    acc[category] = (acc[category] || 0) + amount;
+    return acc;
+  }, {});
+
+  // Ensure default categories exist with 0 values
+  return {
+    Food: 0,
+    Transport: 0,
+    Entertainment: 0,
+    Other: 0,
+    ...categories,
+  };
+}
+
+router.get("/available-years", isLoggedIn, async (req, res, next) => {
   const { accountId } = req.params;
 
   try {
-    // Fetch the account by accountId
-    const account = await Account.findById(accountId).populate({
-      path: "transactions",
-      match: { type: "Expense" }, // Only fetch expense transactions
-    });
+    const account = await Account.findById(accountId).populate("transactions");
+    if (!account) throw new CustomError(404, "Account not found.");
 
-    if (!account) {
-      throw new CustomError(404, "Account not found.");
-    }
+    // Extract unique years from transactions
+    const years = [...new Set(account.transactions.map(t => new Date(t.date).getFullYear()))];
+    years.sort((a, b) => b - a); // Sort in descending order
 
-    // Fetch the user associated with the account
-    const user = await User.findById(account.user);
-
-    if (!user) {
-      throw new CustomError(404, "User not found.");
-    }
-
-    // Calculate total expenses by category for the specific account
-    const expensesByCategory = {
-      Food: 0,
-      Transport: 0,
-      Entertainment: 0,
-    };
-
-    account.transactions.forEach((transaction) => {
-      if (transaction.category in expensesByCategory) {
-        expensesByCategory[transaction.category] += parseFloat(transaction.amount.toString());
-      }
-    });
-
-    // Get initialBalance and current balance for the specific account
-    const initialBalance = parseFloat(account.initialBalance.toString());
-    const currentBalance = parseFloat(account.balance.toString());
-
-    // Calculate monthly spending trend (example)
-    const monthlySpending = {
-      January: 500,
-      February: 700,
-      March: 300,
-      April: 900,
-      May: 600,
-      June: 800,
-    };
-
-    // Return JSON data
-    res.json({
-      initialBalance,
-      currentBalance,
-      expensesByCategory,
-      monthlySpending,
-    });
+    res.json({ years });
   } catch (error) {
     next(error);
   }

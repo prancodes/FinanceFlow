@@ -38,6 +38,9 @@ const EditTransaction = () => {
     const fetchTransactionData = async () => {
       try {
         const response = await fetch(`/api/dashboard/${accountId}/transaction/${transactionId}/edit`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch transaction data');
+        }
         const data = await response.json();
         setTransaction({
           type: data.type || "",
@@ -49,7 +52,7 @@ const EditTransaction = () => {
           recurringInterval: data.recurringInterval || "",
         });
       } catch (error) {
-        // Error handling
+        setError(error.message || 'An error occurred while loading the transaction.');
       }
     };
 
@@ -75,7 +78,8 @@ const EditTransaction = () => {
       if (response.ok) {
         navigate(`/dashboard/${accountId}`);
       } else {
-        setError("Failed to update transaction");
+        const errorData = await response.json();
+        setError(errorData.message || "Failed to update transaction");
       }
     } catch (error) {
       setError("An error occurred while updating the transaction.");
@@ -135,6 +139,7 @@ const EditTransaction = () => {
             <option>Food</option>
             <option>Transport</option>
             <option>Entertainment</option>
+            <option>Other</option>
           </select>
         </div>
 
