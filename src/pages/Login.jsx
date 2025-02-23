@@ -30,7 +30,6 @@ const Login = () => {
         setError(data.error || 'Login failed. Please try again.');
       }
     } catch (err) {
-      console.error('Login error:', err);
       setError('An error occurred. Please try again later.');
     }
   };
@@ -54,7 +53,7 @@ const Login = () => {
             type="email"
             name="login[email]"
             placeholder="abc@example.com"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300 cursor-pointer"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -69,7 +68,7 @@ const Login = () => {
             type="password"
             name="login[password]"
             placeholder="Enter your password"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300 cursor-pointer"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -77,13 +76,13 @@ const Login = () => {
         </div>
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600"
+          className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 cursor-pointer"
         >
           Login
         </button>
         <p className="text-center text-sm text-gray-600 mt-4">
           Don't have an account?{' '}
-          <a href="/signup" className="text-blue-500">
+          <a href="/signup" className="text-blue-500 cursor-pointer">
             Sign Up
           </a>
         </p>

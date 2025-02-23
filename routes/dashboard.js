@@ -1,5 +1,5 @@
 import express from 'express';
-import isLoggedIn from '../utils/isLoggedIn.js';
+import isLoggedIn from '../middleware/isLoggedIn.js';
 import { User } from '../models/User.model.js';
 import { Account } from '../models/Account.model.js';
 import CustomError from '../utils/CustomError.js';
@@ -16,7 +16,7 @@ router.get("/addAccount", isLoggedIn, (req, res) => {
 router.get("/", isLoggedIn, async (req, res, next) => {
   try {
     const userId = req.session.userId;
-    if (!userId) return res.status(401).json({ message: 'User not authenticated' });
+    if (!userId) throw new CustomError(401, 'User not authenticated');
 
     const user = await User.findById(userId).populate('accounts');
     if (!user) throw new CustomError(404, 'User not found');
@@ -37,13 +37,13 @@ router.get("/", isLoggedIn, async (req, res, next) => {
 router.get("/:accountId", isLoggedIn, async (req, res, next) => {
   try {
     const userId = req.session.userId;
-    if (!userId) return res.status(401).json({ message: 'User not authenticated' });
+    if (!userId) throw new CustomError(401, 'User not authenticated');
 
     const { accountId } = req.params;
     const account = await Account.findOne({ _id: accountId, user: userId }).populate("transactions");
 
     if (!account) {
-      return res.status(404).json({ message: "Account not found or access denied." });
+      throw new CustomError(404, "Account not found or access denied.");
     }
 
     res.json({

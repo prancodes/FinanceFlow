@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Bar, Line, Pie } from "react-chartjs-2";
 import axios from "axios";
+import ErrorMessage from '../components/ErrorMessage';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -38,6 +39,7 @@ const Analytics = ({ userId }) => {
     monthlySpending: {},
   });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -49,6 +51,7 @@ const Analytics = ({ userId }) => {
           navigate('/login');
         }
       } catch (error) {
+        setError("Error checking authentication.");
         navigate('/login');
       }
     };
@@ -58,14 +61,12 @@ const Analytics = ({ userId }) => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      // Fetch analytics data from the backend
       axios.get(`/api/dashboard/${accountId}/analytics`)
         .then((response) => {
-          console.log("Analytics Data:", response.data); // Debugging
           setData(response.data);
         })
         .catch((error) => {
-          console.error("Error fetching analytics data:", error);
+          setError("Error fetching analytics data.");
         });
     }
   }, [accountId, isAuthenticated]);
@@ -131,13 +132,14 @@ const Analytics = ({ userId }) => {
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Expense Analytics</h2>
+      <ErrorMessage message={error} onClose={() => setError('')} />
+      <h2 className="text-2xl font-bold mb-4 cursor-pointer">Expense Analytics</h2>
 
       {/* Expenses by Category (Bar Chart) and Balance Overview (Line Chart) */}
       <div className="flex flex-col md:flex-row md:gap-8">
         {/* Bar Chart */}
         <div className="mb-8 md:flex-1"> 
-          <h3 className="text-xl font-semibold mb-2">Expenses by Category</h3>
+          <h3 className="text-xl font-semibold mb-2 cursor-pointer">Expenses by Category</h3>
           <div className="w-full h-96"> 
             <Bar data={barChartData} options={chartOptions} />
           </div>
@@ -145,7 +147,7 @@ const Analytics = ({ userId }) => {
 
         {/* Line Chart */}
         <div className="mb-8 md:flex-1"> 
-          <h3 className="text-xl font-semibold mb-2">Balance Overview</h3>
+          <h3 className="text-xl font-semibold mb-2 cursor-pointer">Balance Overview</h3>
           <div className="w-full h-96"> 
             <Line data={lineChartData} options={chartOptions} />
           </div>
@@ -154,7 +156,7 @@ const Analytics = ({ userId }) => {
 
       {/* Expense Distribution (Pie Chart) */}
       <div className="mb-8">
-        <h3 className="text-xl font-semibold mb-2">Expense Distribution</h3>
+        <h3 className="text-xl font-semibold mb-2 cursor-pointer">Expense Distribution</h3>
         <div className="w-full h-96"> 
           <Pie data={pieChartData} options={chartOptions} />
         </div>
@@ -162,7 +164,7 @@ const Analytics = ({ userId }) => {
 
       {/* Monthly Spending Trend (Line Chart) */}
       <div>
-        <h3 className="text-xl font-semibold mb-2">Monthly Spending Trend</h3>
+        <h3 className="text-xl font-semibold mb-2 cursor-pointer">Monthly Spending Trend</h3>
         <div className="w-full h-96"> 
           <Line data={monthlySpendingData} options={chartOptions} />
         </div>

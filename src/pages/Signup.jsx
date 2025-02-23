@@ -39,7 +39,6 @@ const Signup = () => {
         setError(data.error || "Signup failed. Please try again.");
       }
     } catch (error) {
-      console.error("Error during signup:", error);
       setError("An error occurred. Please try again later.");
     }
   };
@@ -68,7 +67,7 @@ const Signup = () => {
                 id="name"
                 name="name"
                 placeholder="John Doe"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300 cursor-pointer"
                 value={formData.name}
                 onChange={handleChange}
                 required
@@ -84,7 +83,7 @@ const Signup = () => {
                 id="email"
                 name="email"
                 placeholder="abc@example.com"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300 cursor-pointer"
                 value={formData.email}
                 onChange={handleChange}
                 required
@@ -100,7 +99,7 @@ const Signup = () => {
                 id="password"
                 name="password"
                 placeholder="Enter your password"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300 cursor-pointer"
                 value={formData.password}
                 onChange={handleChange}
                 required
@@ -109,7 +108,7 @@ const Signup = () => {
 
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600"
+              className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 cursor-pointer"
             >
               Sign Up
             </button>
@@ -117,7 +116,7 @@ const Signup = () => {
 
           <p className="text-center text-sm text-gray-600 mt-4">
             Already have an account?{" "}
-            <a href="/login" className="text-blue-500">
+            <a href="/login" className="text-blue-500 cursor-pointer">
               Login
             </a>
           </p>
