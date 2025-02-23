@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-if(process.env.NODE_ENV !== "production") {
+if (process.env.NODE_ENV !== "production") {
   dotenv.config();
 }
 import express from 'express';
@@ -42,8 +42,7 @@ router.post("/signup", async (req, res, next) => {
     // Generate JWT token and set it in a cookie
     jwt.sign({ userId: createdUser._id, name }, jwtSecret, {}, (err, token) => {
       if (err) {
-        console.error("JWT Error:", err);
-        return res.redirect("/signup");
+        return next(new CustomError(500, "JWT error. Please try again later."));
       }
       res.cookie("token", token, { sameSite: "none", secure: true });
       res.redirect("/dashboard");
@@ -55,8 +54,8 @@ router.post("/signup", async (req, res, next) => {
 
 // Login route
 router.post("/login", async (req, res, next) => {
-  const { email, password } = req.body.login;
   try {
+    const { email, password } = req.body.login;
     const findUser = await User.findOne({ email });
     if (!findUser) {
       throw new CustomError(404, "User not found");
@@ -67,22 +66,32 @@ router.post("/login", async (req, res, next) => {
       req.session.userId = findUser._id;
       jwt.sign({ userId: findUser._id, name: findUser.name }, jwtSecret, {}, (err, token) => {
         if (err) {
-          console.error("JWT Error:", err);
           return next(new CustomError(500, "JWT error. Please try again later."));
         }
         res.cookie("token", token, { sameSite: "none", secure: true });
         res.redirect("/dashboard");
       });
     } else {
-      res.status(401).json({ error: "Incorrect password" });
+      throw new CustomError(401, "Incorrect password");
     }
   } catch (error) {
     next(error);
   }
 });
 
-// Check authentication status
-router.get('/checkAuth', (req, res) => {
+// Logout route
+router.post("/logout", (req, res, next) => {
+  res.clearCookie("token");
+  req.session.destroy(err => {
+    if (err) {
+      return next(new CustomError(500, "Logout error. Please try again later."));
+    }
+    res.redirect("/login");
+  });
+});
+
+// Check authentication route
+router.get("/checkAuth", (req, res) => {
   if (req.session.userId) {
     res.status(200).json({ authenticated: true });
   } else {

@@ -8,7 +8,7 @@ const TransactionForm = () => {
   const [type, setType] = useState("Expense");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [description, setDescription] = useState("");
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurringInterval, setRecurringInterval] = useState("Daily");
@@ -68,7 +68,7 @@ const TransactionForm = () => {
             const parsedData = result.data;
 
             const extractedAmount = parsedData.amount || "";
-            const extractedDate = parsedData.date ? new Date(parsedData.date).toISOString().split('T')[0] : "";
+            const extractedDate = parsedData.date ? new Date(parsedData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
             let extractedDescription = parsedData.description || "Scanned from receipt";
             const extractedCategory = parsedData.category || "";
             const extractedType = parsedData.type || "Expense";
@@ -162,7 +162,7 @@ const TransactionForm = () => {
         <ErrorMessage message={error} onClose={() => setError('')} />
         <button 
           type="button"
-          className="mb-2 w-full px-4 py-2 hover:cursor-pointer bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg hover:from-pink-600 hover:to-purple-600 transition-colors flex items-center justify-center"
+          className="mb-2 w-full px-4 py-2 hover:cursor-pointer bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg hover:from-pink-600 hover:to-purple-600 transition-colors flex items-center justify-center cursor-pointer"
           onClick={handleScanWithAI}
           disabled={isLoading}
         >
@@ -188,7 +188,7 @@ const TransactionForm = () => {
           <select
             id='type'
             name="transaction[type]"
-            className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200"
+            className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200 cursor-pointer"
             value={type}
             onChange={(e) => setType(e.target.value)}
           >
@@ -203,7 +203,7 @@ const TransactionForm = () => {
               <input
                 type="number"
                 name="transaction[amount]"
-                className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200"
+                className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200 cursor-pointer"
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
@@ -220,7 +220,7 @@ const TransactionForm = () => {
           <select
             id="category"
             name="transaction[category]"
-            className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200"
+            className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200 cursor-pointer"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             required
@@ -237,7 +237,7 @@ const TransactionForm = () => {
             <input
               type="date"
               name="transaction[date]"
-              className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200"
+              className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200 cursor-pointer"
               value={date}
               onChange={(e) => setDate(e.target.value)}
               required
@@ -250,7 +250,7 @@ const TransactionForm = () => {
             <input
               type="text"
               name="transaction[description]"
-              className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200"
+              className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200 cursor-pointer"
               placeholder="Enter description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -266,7 +266,7 @@ const TransactionForm = () => {
           </div>
           <button
             type="button"
-            className={`relative inline-flex items-center cursor-pointer w-10 h-6 rounded-full transition-colors focus:outline-none ${isRecurring ? 'bg-blue-500' : 'bg-gray-300'}`}
+            className={`relative inline-flex items-center cursor-pointer w-10 h-6 rounded-full transition-colors focus:outline-none ${isRecurring ? 'bg-blue-500' : 'bg-gray-300'} cursor-pointer`}
             onClick={() => setIsRecurring(!isRecurring)}
           >
             <span
@@ -280,7 +280,7 @@ const TransactionForm = () => {
             <label className="block text-black mb-3">Recurring Interval</label>
             <select
               name="transaction[recurringInterval]"
-              className="w-full p-2 h-10 border border-gray-300 rounded-lg bg-gray-100 focus:ring-gray-200"
+              className="w-full p-2 h-10 border border-gray-300 rounded-lg bg-gray-100 focus:ring-gray-200 cursor-pointer"
               value={recurringInterval}
               onChange={(e) => setRecurringInterval(e.target.value)}
             >
@@ -293,10 +293,10 @@ const TransactionForm = () => {
         )}
 
         <div className="flex space-x-4">
-          <button type="button" className="w-1/2 px-4 py-2 hover:bg-gray-300 rounded-lg bg-gray-200">
+          <button type="button" className="w-1/2 px-4 py-2 hover:bg-gray-300 rounded-lg bg-gray-200 cursor-pointer">
             Cancel
           </button>
-          <button type="submit" className="w-1/2 px-4 py-2 rounded-lg bg-gray-800 hover:bg-black text-white">
+          <button type="submit" className="w-1/2 px-4 py-2 rounded-lg bg-gray-800 hover:bg-black text-white cursor-pointer">
             Create Transaction
           </button>
         </div>

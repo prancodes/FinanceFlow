@@ -7,6 +7,19 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/checkAuth');
+        if (response.status === 401) {
+          navigate('/login');
+          return;
+        }
+        setIsAuthenticated(true);
+      } catch (error) {
+        navigate('/login');
+      }
+    };
+
     const fetchData = async () => {
       try {
         const response = await fetch('/api/dashboard');
@@ -18,11 +31,11 @@ const Dashboard = () => {
         setUserData(data);
         setIsAuthenticated(true);
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
         navigate('/login');
       }
     };
 
+    checkAuth();
     fetchData();
   }, [navigate]);
 

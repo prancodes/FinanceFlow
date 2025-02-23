@@ -5,18 +5,18 @@ import { Account } from '../models/Account.model.js';
 import { Budget } from '../models/Budget.model.js';
 import { User } from '../models/User.model.js';
 import CustomError from '../utils/CustomError.js';
+import isLoggedIn from '../middleware/isLoggedIn.js';
 
 const router = express.Router({ mergeParams: true });
 
 // Render the Transaction Form
-router.get("/createTransaction", (req, res) => {
+router.get("/createTransaction", isLoggedIn, (req, res) => {
   const { accountId } = req.params;
   res.redirect(`/dashboard/${accountId}/createTransaction`);
 });
 
 // Add transaction route
-router.post("/transaction", async (req, res, next) => {
-  console.log("Received Data:", req.body);
+router.post("/transaction", isLoggedIn, async (req, res, next) => {
   try {
     const { accountId } = req.params;
     const userId = req.session.userId;
@@ -122,7 +122,6 @@ router.post("/transaction", async (req, res, next) => {
     );
 
     let budget = await Budget.findOne({ user: userId });
-    console.log(budget);
     try {
       if (!budget) {
         budget = new Budget({
@@ -136,13 +135,12 @@ router.post("/transaction", async (req, res, next) => {
           { $push: { budgets: budget._id } },
           { new: true }
         );
-        console.log("New budget created and added to the user.");
       } else {
         budget.currentBalance = account.balance;
         await budget.save();
       }
     } catch (error) {
-      console.error("Error creating Budget", error);
+      throw new CustomError(500, "Error creating Budget");
     }
 
     res.redirect(`/dashboard/${accountId}`);
@@ -153,7 +151,7 @@ router.post("/transaction", async (req, res, next) => {
 });
 
 // Render Transaction Edit Form
-router.get("/transaction/:transactionId/edit", async (req, res, next) => {
+router.get("/transaction/:transactionId/edit", isLoggedIn, async (req, res, next) => {
   const { accountId, transactionId } = req.params;
   try {
     const userId = req.session.userId;
@@ -169,13 +167,12 @@ router.get("/transaction/:transactionId/edit", async (req, res, next) => {
       amount: parseFloat(transaction.amount.toString())
     });
   } catch (err) {
-    console.error("Error fetching transaction:", err);
     next(err);
   }
 });
 
 // Update transaction data and store in Database
-router.put("/transaction/:transactionId", async (req, res, next) => {
+router.put("/transaction/:transactionId", isLoggedIn, async (req, res, next) => {
   const { accountId, transactionId } = req.params;
   const { type, amount, category, date, description, isRecurring, recurringInterval } = req.body.transaction;
   try {
@@ -295,7 +292,6 @@ router.put("/transaction/:transactionId", async (req, res, next) => {
 
     res.redirect(`/dashboard/${accountId}`);
   } catch (err) {
-    console.error("Error updating transaction:", err);
     next(err);
   }
 });

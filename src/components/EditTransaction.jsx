@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import ErrorMessage from '../components/ErrorMessage';
 
 const EditTransaction = () => {
   const { accountId, transactionId } = useParams();
@@ -13,6 +14,7 @@ const EditTransaction = () => {
     recurringInterval: "",
   });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -47,7 +49,7 @@ const EditTransaction = () => {
           recurringInterval: data.recurringInterval || "",
         });
       } catch (error) {
-        console.error('Error fetching transaction data:', error);
+        // Error handling
       }
     };
 
@@ -73,10 +75,10 @@ const EditTransaction = () => {
       if (response.ok) {
         navigate(`/dashboard/${accountId}`);
       } else {
-        console.error('Failed to update transaction');
+        setError("Failed to update transaction");
       }
     } catch (error) {
-      console.error('Error updating transaction:', error);
+      setError("An error occurred while updating the transaction.");
     }
   };
 
@@ -91,12 +93,13 @@ const EditTransaction = () => {
         className="max-w-2xl mx-auto mt-3 p-6 bg-white rounded-xl"
       >
         <h2 className="text-4xl font-bold text-blue-600 mb-4">Edit Transaction</h2>
+        <ErrorMessage message={error} onClose={() => setError('')} />
 
         <div className="mb-4">
           <label className="block text-black mb-3">Type</label>
           <select
             name="transaction[type]"
-            className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200"
+            className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200 cursor-pointer"
             value={transaction.type}
             onChange={(e) => setTransaction({ ...transaction, type: e.target.value })}
           >
@@ -111,7 +114,7 @@ const EditTransaction = () => {
             <input
               type="number"
               name="transaction[amount]"
-              className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200"
+              className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200 cursor-pointer"
               placeholder="0.00"
               value={transaction.amount}
               onChange={(e) => setTransaction({ ...transaction, amount: e.target.value })}
@@ -124,7 +127,7 @@ const EditTransaction = () => {
           <label className="block text-black mb-3">Category</label>
           <select
             name="transaction[category]"
-            className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200"
+            className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200 cursor-pointer"
             value={transaction.category}
             onChange={(e) => setTransaction({ ...transaction, category: e.target.value })}
           >
@@ -140,7 +143,7 @@ const EditTransaction = () => {
           <input
             type="date"
             name="transaction[date]"
-            className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200"
+            className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200 cursor-pointer"
             value={transaction.date}
             onChange={(e) => setTransaction({ ...transaction, date: e.target.value })}
           />
@@ -151,7 +154,7 @@ const EditTransaction = () => {
           <input
             type="text"
             name="transaction[description]"
-            className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200"
+            className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200 cursor-pointer"
             placeholder="Enter description"
             value={transaction.description}
             onChange={(e) => setTransaction({ ...transaction, description: e.target.value })}
@@ -165,7 +168,7 @@ const EditTransaction = () => {
           </div>
           <button
             type="button"
-            className={`relative inline-flex items-center cursor-pointer w-10 h-6 rounded-full transition-colors focus:outline-none ${transaction.isRecurring ? 'bg-blue-500' : 'bg-gray-300'}`}
+            className={`relative inline-flex items-center cursor-pointer w-10 h-6 rounded-full transition-colors focus:outline-none ${transaction.isRecurring ? 'bg-blue-500' : 'bg-gray-300'} cursor-pointer`}
             onClick={() => setTransaction({ ...transaction, isRecurring: !transaction.isRecurring })}
           >
             <span
@@ -179,7 +182,7 @@ const EditTransaction = () => {
             <label className="block text-black mb-3">Recurring Interval</label>
             <select
               name="transaction[recurringInterval]"
-              className="w-full p-2 h-10 border border-gray-300 rounded-lg bg-gray-100 focus:ring-gray-200"
+              className="w-full p-2 h-10 border border-gray-300 rounded-lg bg-gray-100 focus:ring-gray-200 cursor-pointer"
               value={transaction.recurringInterval}
               onChange={(e) => setTransaction({ ...transaction, recurringInterval: e.target.value })}
             >
@@ -195,11 +198,11 @@ const EditTransaction = () => {
           <button
             type="button"
             onClick={() => navigate(`/dashboard/${accountId}`)}
-            className="w-1/2 px-4 py-2 hover:bg-gray-300 rounded-lg bg-gray-200"
+            className="w-1/2 px-4 py-2 hover:bg-gray-300 rounded-lg bg-gray-200 cursor-pointer"
           >
             Cancel
           </button>
-          <button type="submit" className="w-1/2 px-4 py-2 rounded-lg bg-gray-800 hover:bg-black text-white">
+          <button type="submit" className="w-1/2 px-4 py-2 rounded-lg bg-gray-800 hover:bg-black text-white cursor-pointer">
             Update Transaction
           </button>
         </div>

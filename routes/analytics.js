@@ -1,11 +1,12 @@
 import express from "express";
 import CustomError from "../utils/CustomError.js";
+import isLoggedIn from '../middleware/isLoggedIn.js';
 import { Account } from "../models/Account.model.js";
 import { User } from "../models/User.model.js";
 
 const router = express.Router({ mergeParams: true });
 
-router.get("/analytics", async (req, res, next) => {
+router.get("/analytics", isLoggedIn,async (req, res, next) => {
   const { accountId } = req.params;
 
   try {

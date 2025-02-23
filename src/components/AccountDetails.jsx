@@ -1,12 +1,14 @@
 // src/components/AccountDetails.jsx
 import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
+import ErrorMessage from '../components/ErrorMessage';
 
 const AccountDetail = () => {
   const navigate = useNavigate();
   const { accountId } = useParams();
   const [account, setAccount] = useState({ name: '', type: '', balance: 0, transactions: [] });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [error, setError] = useState("");
 
   const handleViewAnalytics = () => {
     navigate(`/dashboard/${accountId}/analytics`); // Navigate to the analytics page
@@ -22,6 +24,7 @@ const AccountDetail = () => {
           navigate('/login');
         }
       } catch (error) {
+        setError("Error checking authentication.");
         navigate('/login');
       }
     };
@@ -36,7 +39,7 @@ const AccountDetail = () => {
         const data = await response.json();
         setAccount(data);
       } catch (error) {
-        console.error('Error fetching account data:', error);
+        setError("Error fetching account data.");
       }
     };
 
@@ -50,13 +53,14 @@ const AccountDetail = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+        <ErrorMessage message={error} onClose={() => setError('')} />
         <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
           {account.name} Account Details
         </h1>
         <div className='flex items-center justify-center'>
           <button 
             type="button" 
-            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mb-5"
+            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mb-5 cursor-pointer"
             onClick={handleViewAnalytics}
           >
             View Analytics
@@ -84,7 +88,7 @@ const AccountDetail = () => {
                     <span className="text-gray-600">
                       <strong>Type:</strong> {txn.type}
                     </span>
-                    <Link to={`/dashboard/${account._id}/transaction/${txn._id}/edit`}>
+                    <Link to={`/dashboard/${account._id}/transaction/${txn._id}/edit`} className="cursor-pointer">
                       Edit
                     </Link>
                   </div>
@@ -101,12 +105,12 @@ const AccountDetail = () => {
           </ul>
         </div>
         <div className="mt-6 flex justify-between items-center">
-          <Link to="/dashboard" className="text-blue-500 hover:underline">
+          <Link to="/dashboard" className="text-blue-500 hover:underline cursor-pointer">
             Back to Dashboard
           </Link>
           <Link 
             to={`/dashboard/${account._id}/createTransaction`} 
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors cursor-pointer"
           >
             Create Transaction
           </Link>

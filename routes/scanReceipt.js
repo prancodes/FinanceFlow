@@ -3,12 +3,13 @@ if (process.env.NODE_ENV !== "production") {
   dotenv.config();
 }
 import express from 'express';
+import isLoggedIn from '../middleware/isLoggedIn.js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const router = express.Router();
 const apiKey = process.env.GEMINI_API_KEY;
 
-router.post('/scan-receipt', async (req, res) => {
+router.post('/scan-receipt', isLoggedIn,async (req, res, next) => {
   const { fileData, fileType } = req.body;
 
   try {
@@ -54,8 +55,7 @@ router.post('/scan-receipt', async (req, res) => {
 
     res.json({ success: true, data: JSON.parse(jsonString) });
   } catch (error) {
-    console.error("Error scanning receipt:", error);
-    res.status(500).json({ success: false, message: "An error occurred while scanning the receipt." });
+    next(new CustomError(500, "An error occurred while scanning the receipt."));
   }
 });
 
