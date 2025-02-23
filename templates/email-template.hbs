@@ -1,0 +1,18 @@
+<h1>Monthly Expense Report</h1>
+<p>Hello,</p>
+<p>Here is your monthly expense report:</p>
+<ul>
+  <li><strong>Initial Balance:</strong> {{initialBalance}}</li>
+  <li><strong>Current Balance:</strong> {{currentBalance}}</li>
+</ul>
+<h2>Expenses by Category</h2>
+<ul>
+  {{#each expensesByCategory}}
+    <li><strong>{{@key}}:</strong> {{this}}</li>
+  {{/each}}
+</ul>
+<h2>Insights</h2>
+<p>{{insights}}</p>
+<br>
+{{{cta}}}
+<p>Thank you for using our service!</p>
