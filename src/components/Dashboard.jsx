@@ -72,7 +72,7 @@ const Dashboard = () => {
                     <h3 className="text-xl font-medium">{account.name}</h3>
                     <p className="text-gray-600">Type: {account.type}</p>
                     <p className="text-gray-600">
-                      Balance: ${parseFloat(account.balance.toString()).toFixed(2)}
+                      Balance: ₹{parseFloat(account.balance.toString()).toFixed(2)}
                     </p>
                   </li>
                 </Link>

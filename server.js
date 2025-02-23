@@ -1,19 +1,19 @@
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 if (process.env.NODE_ENV !== "production") {
   dotenv.config();
 }
-import fs from 'node:fs/promises';
-import express from 'express';
-import mongoose from 'mongoose';
-import cookieParser from 'cookie-parser';
-import session from 'express-session';
-import path from 'path';
-import MongoStore from 'connect-mongo';
-import startScheduler from './utils/scheduler.js';
-import CustomError from './utils/CustomError.js';
-import errorHandler from './middleware/errorHandler.js';
-import { sendMonthlyAlerts } from './utils/monthlyAlerts.js';
-import cron from "node-cron"
+import fs from "node:fs/promises";
+import express from "express";
+import mongoose from "mongoose";
+import cookieParser from "cookie-parser";
+import session from "express-session";
+import path from "path";
+import MongoStore from "connect-mongo";
+import startScheduler from "./utils/scheduler.js";
+import CustomError from "./utils/CustomError.js";
+import errorHandler from "./middleware/errorHandler.js";
+import { sendMonthlyAlerts } from "./utils/monthlyAlerts.js";
+import cron from "node-cron";
 
 // Connect to MongoDB
 const MONGO_URL = process.env.MONGODB_URI;
@@ -24,16 +24,16 @@ async function main() {
 main().catch(console.error);
 
 // Constants
-const isProduction = process.env.NODE_ENV === 'production'
-const port = process.env.PORT || 5173
-const base = process.env.BASE || '/'
+const isProduction = process.env.NODE_ENV === "production";
+const port = process.env.PORT || 5173;
+const base = process.env.BASE || "/";
 
 // Create Express app
 const app = express();
 
 // Increase the request size limit
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ limit: '5mb', extended: true }));
+app.use(express.json({ limit: "5mb" }));
+app.use(express.urlencoded({ limit: "5mb", extended: true }));
 
 // Middleware setup
 app.use(express.json());
@@ -45,7 +45,7 @@ app.use(express.static(path.join(process.cwd(), "public")));
 const store = MongoStore.create({
   mongoUrl: MONGO_URL,
   crypto: { secret: process.env.SESSION_SECRET },
-  touchAfter: 24 * 3600
+  touchAfter: 24 * 3600,
 });
 store.on("error", (error) => {
   console.error("Error in Mongo Session Store", error);
@@ -59,80 +59,80 @@ const sessionOptions = {
     expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
-  }
+  },
 };
 app.use(session(sessionOptions));
 
 // Import routes
-import homeRoutes from './routes/home.js';
-import authRoutes from './routes/auth.js';
-import dashboardRoutes from './routes/dashboard.js';
-import transactionRoutes from './routes/transactions.js';
-import analyticsRoutes from './routes/analytics.js'
-import scanReceiptRoutes from './routes/scanReceipt.js';
+import homeRoutes from "./routes/home.js";
+import authRoutes from "./routes/auth.js";
+import dashboardRoutes from "./routes/dashboard.js";
+import transactionRoutes from "./routes/transactions.js";
+import analyticsRoutes from "./routes/analytics.js";
+import scanReceiptRoutes from "./routes/scanReceipt.js";
 
 // Cached production assets
 const templateHtml = isProduction
-  ? await fs.readFile('./dist/client/index.html', 'utf-8')
-  : ''
+  ? await fs.readFile("./dist/client/index.html", "utf-8")
+  : "";
 
 // Add Vite or respective production middlewares
 /** @type {import('vite').ViteDevServer | undefined} */
-let vite
+let vite;
 if (!isProduction) {
-  const { createServer } = await import('vite')
+  const { createServer } = await import("vite");
   vite = await createServer({
     server: { middlewareMode: true },
-    appType: 'custom',
+    appType: "custom",
     base,
-  })
-  app.use(vite.middlewares)
+  });
+  app.use(vite.middlewares);
 } else {
-  const compression = (await import('compression')).default
-  const sirv = (await import('sirv')).default
-  app.use(compression())
-  app.use(base, sirv('./dist/client', { extensions: [] }))
+  const compression = (await import("compression")).default;
+  const sirv = (await import("sirv")).default;
+  app.use(compression());
+  app.use(base, sirv("./dist/client", { extensions: [] }));
 }
 
 // API Routes
-app.use('/api', homeRoutes);
-app.use('/api', authRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/dashboard/:accountId', transactionRoutes);
-app.use('/api/dashboard/:accountId', analyticsRoutes);
-app.use('/api/dashboard/:accountId/transaction', scanReceiptRoutes);
+app.use("/api", homeRoutes);
+app.use("/api", authRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/dashboard/:accountId", transactionRoutes);
+app.use("/api/dashboard/:accountId", analyticsRoutes);
+app.use("/api/dashboard/:accountId/transaction", scanReceiptRoutes);
 
 // Serve HTML
-app.use('*all', async (req, res) => {
+app.use("*all", async (req, res) => {
   try {
-    const url = req.originalUrl.replace(base, '')
+    const url = req.originalUrl.replace(base, "");
 
     /** @type {string} */
-    let template
+    let template;
     /** @type {import('./src/entry-server.js').render} */
-    let render
+    let render;
     if (!isProduction) {
-      template = await fs.readFile('./index.html', 'utf-8')
-      template = await vite.transformIndexHtml(url, template)
-      render = (await vite.ssrLoadModule('/src/entry-server.jsx')).render
+      template = await fs.readFile("./index.html", "utf-8");
+      template = await vite.transformIndexHtml(url, template);
+      render = (await vite.ssrLoadModule("/src/entry-server.jsx")).render;
     } else {
-      template = templateHtml
-      render = (await import('./dist/server/entry-server.js')).render
+      template = templateHtml;
+      render = (await import("./dist/server/entry-server.js")).render;
     }
 
-    const rendered = await render(url)
+    const rendered = await render(url);
 
     const html = template
-      .replace(`<!--app-head-->`, rendered.head ?? '')
-      .replace(`<!--app-html-->`, rendered.html ?? '')
+      .replace(`<!--app-head-->`, rendered.head ?? "")
+      .replace(`<!--app-html-->`, rendered.html ?? "");
 
-    res.status(200).set({ 'Content-Type': 'text/html' }).send(html)
+    res.status(200).set({ "Content-Type": "text/html" }).send(html);
   } catch (e) {
-    vite?.ssrFixStacktrace(e)
-    console.log(e.stack)
-    res.status(500).end(e.stack)
+    vite?.ssrFixStacktrace(e);
+    // console.log(e.stack)
+    res.status(500).end(e.stack);
   }
-})
+});
 
 // Use the custom error handling middleware
 app.use(errorHandler);
@@ -141,5 +141,5 @@ app.use(errorHandler);
 app.listen(port, () => {
   console.log(`Server started at http://localhost:${port}`);
   startScheduler();
-cron.schedule('0 9 1 * *', sendMonthlyAlerts);
-})
+  cron.schedule("0 9 1 * *", sendMonthlyAlerts);
+});

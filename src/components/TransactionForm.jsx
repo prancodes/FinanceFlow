@@ -229,6 +229,7 @@ const TransactionForm = () => {
             <option>Food</option>
             <option>Transport</option>
             <option>Entertainment</option>
+            <option>Other</option>
           </select>
         </div>
 
