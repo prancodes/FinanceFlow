@@ -12,6 +12,8 @@ import MongoStore from 'connect-mongo';
 import startScheduler from './utils/scheduler.js';
 import CustomError from './utils/CustomError.js';
 import errorHandler from './middleware/errorHandler.js';
+import { sendMonthlyAlerts } from './utils/monthlyAlerts.js';
+import cron from "node-cron"
 
 // Connect to MongoDB
 const MONGO_URL = process.env.MONGODB_URI;
@@ -139,4 +141,5 @@ app.use(errorHandler);
 app.listen(port, () => {
   console.log(`Server started at http://localhost:${port}`);
   startScheduler();
+cron.schedule('0 9 1 * *', sendMonthlyAlerts);
 })
