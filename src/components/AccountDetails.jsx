@@ -1,6 +1,7 @@
 // src/components/AccountDetails.jsx
 import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 import ErrorMessage from '../components/ErrorMessage';
 
 const AccountDetail = () => {
@@ -45,6 +46,48 @@ const AccountDetail = () => {
 
     fetchAccountData();
   }, [accountId]);
+  const handleDeleteTransaction = async (transactionId, transactionType, transactionAmount) => {
+    const isConfirmed = window.confirm("Are you sure you want to delete this transaction?");
+    if (!isConfirmed) return;
+  
+    try {
+      const response = await fetch(`/api/dashboard/${accountId}/transaction/${transactionId}`, {
+        method: "DELETE",
+      });
+  
+      if (response.ok) {
+        // Update the local state to reflect the changes
+        const updatedTransactions = account.transactions.filter(txn => txn._id !== transactionId);
+  
+        // Update the account balances
+        let updatedBalance = account.balance;
+        let updatedInitialBalance = account.initialBalance;
+  
+        if (transactionType === "Expense") {
+          updatedBalance += transactionAmount;
+        } else if (transactionType === "Income") {
+          updatedInitialBalance -= transactionAmount;
+          updatedBalance -= transactionAmount;
+        }
+  
+        // Update the account state
+        setAccount({
+          ...account,
+          transactions: updatedTransactions,
+          balance: updatedBalance,
+          initialBalance: updatedInitialBalance,
+        });
+  
+        alert("Transaction deleted successfully");
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Failed to delete transaction");
+      }
+    } catch (error) {
+      console.error("Error deleting transaction:", error);
+      setError("An error occurred while deleting the transaction");
+    }
+  };
 
   if (!isAuthenticated) {
     return null;
@@ -90,9 +133,14 @@ const AccountDetail = () => {
                       <span className="text-gray-600">
                         <strong>Type:</strong> {txn.type}
                       </span>
+                    <div className='flex gap-2'>
                       <Link to={`/dashboard/${account._id}/transaction/${txn._id}/edit`} className="cursor-pointer">
-                        Edit
+                      <FaEdit size={18} />
                       </Link>
+                    <button    onClick={() => handleDeleteTransaction(txn._id, txn.type, parseFloat(txn.amount.toString()))} className='hover:cursor-pointer'>
+                      <FaTrash size={18} />
+                    </button>
+                    </div>
                     </div>
                     <p className="text-gray-600">
                       <strong>Date:</strong>

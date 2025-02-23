@@ -18,7 +18,7 @@ import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
-    <footer className="text-center py-10 bg-gradient-to-r from-blue-600 to-indigo-500 text-white flex flex-col items-center">
+    <footer className="text-center py-10 bg-gradient-to-r from-blue-700 to-indigo-600 text-white flex flex-col items-center">
       <h2 className="text-2xl font-semibold mb-2">Ready to Take Control of Your Finances?</h2>
       <p className="mb-6 text-lg opacity-90">
         Join thousands of users who are already managing their finances smarter with Welth
