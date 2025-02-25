@@ -59,7 +59,7 @@ const fetchUserData=async(userId,startDate,endDate)=>{
         
 }
 //This method generates the insights for the user using the gemini model
-const generateInsights = async (expensesByCategory) => {
+const generateInsights = async (expensesByCategory,currentBalance) => {
   if (Object.keys(expensesByCategory).length === 0) {
     return "No expenses found for this month. Great job on managing your finances!";
   }
@@ -69,17 +69,32 @@ const generateInsights = async (expensesByCategory) => {
 
   // Customize the prompt based on the total expenses
   let prompt;
-  if (totalExpenses < 100) {
-    prompt = `The user has spent a total of $${totalExpenses} this month, with the following breakdown:
+  if (currentBalance < 0) {
+    prompt = `You have a negative balance of ₹${Math.abs(currentBalance).toFixed(2)} this month, with the following expenses:
     - Expenses by Category: ${JSON.stringify(expensesByCategory)}
-    Provide a positive and encouraging summary of their spending habits. Highlight any good practices and suggest some investments tips and make sure the summary is short and concise.`;
+    Provide constructive feedback on how to improve their financial health and avoid overspending. Highlight areas where they can cut back. 
+    Important Instructions, start every instruction on a new line:
+    1. Do not suggest using spreadsheets for expense tracking.
+    2. Provide 3-4 actionable suggestions to address the issue.
+    3. Keep the insights concise and well-formatted, not exceeding 10 lines.`;
+  } else if (currentBalance < 100) {
+    prompt = `You have a low balance of ₹${currentBalance.toFixed(2)} this month, with the following expenses:
+    - Expenses by Category: ${JSON.stringify(expensesByCategory)}
+    Provide suggestions on how to increase savings or reduce expenses to improve their financial health.
+    Important Instructions, start every instruction on a new line:
+    1. Do not suggest using spreadsheets for expense tracking.
+    2. Provide 3-4 actionable suggestions to improve savings or reduce expenses.
+    3. Keep the insights concise and well-formatted, not exceeding 10 lines.`;
   } else {
-    prompt = `Analyze the following monthly expenses and provide insights:
-    - Total Expenses: $${totalExpenses}
+    prompt = `You have a healthy balance of ₹${currentBalance.toFixed(2)} this month, with the following expenses:
     - Expenses by Category: ${JSON.stringify(expensesByCategory)}
-    Provide a summary of spending patterns and constructive suggestions for improvement. Focus on positive habits and actionable advice and make sure the summary is short and concise.`;
+    Provide a summary of spending patterns and constructive suggestions for improvement. Highlight positive habits and areas for potential savings.
+    Format the insights as follows and add every points to a new line:
+    1. Start with a brief summary of the financial situation.
+    2. Highlight positive spending habits.
+    3. Provide 2-3 suggestions for further improvement.
+    4. Keep the insights concise and well-formatted, not exceeding 10 lines.`;
   }
-
   try {
     const result = await model.generateContent(prompt);
     const response = await result.response;
@@ -121,7 +136,7 @@ const sendMonthlyAlerts=async()=>{
     for(const user of users )
       {
         const {initialBalance,currentBalance,expensesByCategory}=await fetchUserData(user._id, startOfMonth,endOfMonth);
-        const insights=await generateInsights(expensesByCategory);
+        const insights=await generateInsights(expensesByCategory, parseFloat(currentBalance.toString()));
         const cta = `
         <strong>Keep using FinanceFlow to:</strong>
         <ul>
