@@ -1,6 +1,6 @@
 import React from 'react';
 import HeroSection from '../layouts/HeroSection';
-import { FeatureCard, ReviewCard, StatsCard } from '../card'; 
+import { FeatureCard, ReviewCard, StatsCard } from '../layouts/card'; 
 import { FaChartBar, FaChartPie, FaReceipt, FaClipboardList, FaMoneyBillWave, FaCheckCircle } from "react-icons/fa";
 
 const LandingPage = () => {
