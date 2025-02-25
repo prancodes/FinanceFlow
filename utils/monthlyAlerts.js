@@ -100,7 +100,7 @@ const generateInsights = async (expensesByCategory,currentBalance) => {
     const response = await result.response;
     return response.text();
   } catch (error) {
-    console.error('Error generating insights with Gemini:', error);
+    // console.error('Error generating insights with Gemini:', error);
     return "Unable to generate insights at this time.";
   }
 };

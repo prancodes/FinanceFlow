@@ -105,7 +105,11 @@ app.use("/api/dashboard/:accountId/transaction", scanReceiptRoutes);
 // Serve HTML
 app.use("*all", async (req, res) => {
   try {
-    const url = req.originalUrl.replace(base, "");
+    let url = req.originalUrl.replace(base, "");
+    // Ensure the URL always starts with a leading slash.
+    if (!url.startsWith("/")) {
+      url = "/" + url;
+    }
 
     /** @type {string} */
     let template;
@@ -129,10 +133,10 @@ app.use("*all", async (req, res) => {
     res.status(200).set({ "Content-Type": "text/html" }).send(html);
   } catch (e) {
     vite?.ssrFixStacktrace(e);
-    // console.log(e.stack)
     res.status(500).end(e.stack);
   }
 });
+
 
 // Use the custom error handling middleware
 app.use(errorHandler);

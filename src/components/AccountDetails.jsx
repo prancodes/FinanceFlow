@@ -1,104 +1,120 @@
-// src/components/AccountDetails.jsx
 import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import ErrorMessage from '../components/ErrorMessage';
+import ListSkeleton from '../skeletons/ListSkeleton';
+
+// Cache outside component
+let dataPromise = null;
 
 const AccountDetail = () => {
   const navigate = useNavigate();
   const { accountId } = useParams();
-  const [account, setAccount] = useState({ name: '', type: '', balance: 0, transactions: [] });
+  const [account, setAccount] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState("");
-
-  const handleViewAnalytics = () => {
-    navigate(`/dashboard/${accountId}/analytics`); // Navigate to the analytics page
-  };
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const response = await fetch('/api/checkAuth');
-        if (response.status === 200) {
-          setIsAuthenticated(true);
-        } else {
-          navigate('/login');
-        }
-      } catch (error) {
-        setError("Error checking authentication.");
+        if (response.status === 200) return true;
         navigate('/login');
+        return false;
+      } catch (error) {
+        navigate('/login');
+        return false;
       }
     };
 
-    checkAuth();
-  }, [navigate]);
-
-  useEffect(() => {
     const fetchAccountData = async () => {
       try {
         const response = await fetch(`/api/dashboard/${accountId}`);
-        const data = await response.json();
-        setAccount(data);
+        if (!response.ok) throw new Error('Failed to fetch account');
+        return response.json();
       } catch (error) {
-        setError("Error fetching account data.");
+        throw error;
       }
     };
 
-    fetchAccountData();
-  }, [accountId]);
+    const initializeData = async () => {
+      const isAuth = await checkAuth();
+      if (!isAuth) return;
+
+      try {
+        if (!dataPromise) {
+          dataPromise = fetchAccountData();
+        }
+        
+        const data = await dataPromise;
+        setAccount(data);
+        setIsAuthenticated(true);
+      } catch (error) {
+        setError(error.message || 'Error fetching account data');
+      }
+    };
+
+    initializeData();
+
+    return () => {
+      if (!account) dataPromise = null;
+    };
+  }, [accountId, navigate]);
+
+  const handleViewAnalytics = () => {
+    navigate(`/dashboard/${accountId}/analytics`);
+  };
+
   const handleDeleteTransaction = async (transactionId, transactionType, transactionAmount) => {
     const isConfirmed = window.confirm("Are you sure you want to delete this transaction?");
     if (!isConfirmed) return;
-  
+
     try {
       const response = await fetch(`/api/dashboard/${accountId}/transaction/${transactionId}`, {
         method: "DELETE",
       });
-  
+
       if (response.ok) {
-        // Update the local state to reflect the changes
-        const updatedTransactions = account.transactions.filter(txn => txn._id !== transactionId);
-  
-        // Update the account balances
-        let updatedBalance = account.balance;
-        let updatedInitialBalance = account.initialBalance;
-  
-        if (transactionType === "Expense") {
-          updatedBalance += transactionAmount;
-        } else if (transactionType === "Income") {
-          updatedInitialBalance -= transactionAmount;
-          updatedBalance -= transactionAmount;
-        }
-  
-        // Update the account state
-        setAccount({
-          ...account,
-          transactions: updatedTransactions,
-          balance: updatedBalance,
-          initialBalance: updatedInitialBalance,
+        setAccount(prev => {
+          const updatedTransactions = prev.transactions.filter(txn => txn._id !== transactionId);
+          let updatedBalance = prev.balance;
+          let updatedInitialBalance = prev.initialBalance;
+
+          if (transactionType === "Expense") {
+            updatedBalance += transactionAmount;
+          } else if (transactionType === "Income") {
+            updatedInitialBalance -= transactionAmount;
+            updatedBalance -= transactionAmount;
+          }
+
+          return {
+            ...prev,
+            transactions: updatedTransactions,
+            balance: updatedBalance,
+            initialBalance: updatedInitialBalance
+          };
         });
-  
         alert("Transaction deleted successfully");
       } else {
         const errorData = await response.json();
         setError(errorData.message || "Failed to delete transaction");
       }
     } catch (error) {
-      console.error("Error deleting transaction:", error);
+      // console.error("Error deleting transaction:", error);
       setError("An error occurred while deleting the transaction");
     }
   };
 
-  if (!isAuthenticated) {
-    return null;
+  if (!isAuthenticated || !account) {
+    return <ListSkeleton />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+    <div className="min-h-screen bg-gray-100 lg:p-6">
+      <div className="max-w-4xl mx-auto bg-white lg:p-8 p-6 rounded-lg shadow-lg">
         <ErrorMessage message={error} onClose={() => setError('')} />
         <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
-          {account.name} - Account Details
+          '{account.name}' Account Details
         </h1>
         <div className='flex items-center justify-center'>
           <button
