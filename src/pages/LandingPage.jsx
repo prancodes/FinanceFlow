@@ -5,12 +5,12 @@ import { FaChartBar, FaChartPie, FaReceipt, FaClipboardList, FaMoneyBillWave, Fa
 
 const LandingPage = () => {
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col md:mt-7">
         {/* Hero Section */}
         <HeroSection/>
 
       {/* Stats Section */}
-      <div className="p-6 bg-blue-50 text-center grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="py-3 md:p-6 bg-blue-50 text-center grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatsCard label="Active Users" value="20K+" />
         <StatsCard label="Transactions Tracked" value="₹2B+" />
         <StatsCard label="Uptime" value="99.9%" />
@@ -18,7 +18,7 @@ const LandingPage = () => {
       </div>
 
       {/* Features Section */}
-      <div className="p-8">
+      <div className="px-4 py-8 md:p-8">
         <h2 className="text-2xl font-semibold text-center mb-6">
           Everything you need to manage your finances
         </h2>
@@ -30,7 +30,7 @@ const LandingPage = () => {
       </div>
 
       {/* Working Section */}
-      <div className="p-8 bg-gray-100">
+      <div className="px-4 py-8 md:p-8 bg-gray-100">
         <h2 className="text-2xl font-semibold text-center mb-6">How It Works</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <FeatureCard icon={FaClipboardList} title="Step 1: Add Transactions" desc="Log your expenses and incomes easily." />
@@ -40,7 +40,7 @@ const LandingPage = () => {
       </div>
 
       {/* Reviews Section */}
-      <div className="p-8 text-center">
+      <div className="px-4 py-8 md:p-8 text-center">
         <h2 className="text-2xl font-semibold mb-6">What Our Users Say</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <ReviewCard name="Krishna Sharma" role="Small Business Owner" text="FinanceFlow has transformed how I manage my business finances. The AI insights have helped me identify cost-saving opportunities I never knew existed." />

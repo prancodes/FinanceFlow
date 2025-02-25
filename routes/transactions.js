@@ -219,10 +219,22 @@ router.put("/transaction/:transactionId", isLoggedIn, async (req, res, next) => 
         (parseFloat(budget.amount.toString()) - oldAmount).toString()
       );
     }
+
+    // Merge the new date (from the request) with the original time from oldTransaction.date
+    let updatedDate = new Date(date);
+    if (oldTransaction.date) {
+      updatedDate.setHours(
+        oldTransaction.date.getHours(),
+        oldTransaction.date.getMinutes(),
+        oldTransaction.date.getSeconds(),
+        oldTransaction.date.getMilliseconds()
+      );
+    }
+
+    // Set up nextRecurringDate if the transaction is recurring
     let nextRecurringDate = null;
     if (isRecurring === "on" || isRecurring === true) {
-      const transactionDate = new Date(date);
-      nextRecurringDate = new Date(transactionDate);
+      nextRecurringDate = new Date(updatedDate);
       switch (recurringInterval) {
         case "Daily":
           nextRecurringDate.setDate(nextRecurringDate.getDate() + 1);
@@ -241,13 +253,14 @@ router.put("/transaction/:transactionId", isLoggedIn, async (req, res, next) => 
       }
     }
 
+    // Update the transaction
     const updatedTransaction = await Transaction.findByIdAndUpdate(
       transactionId,
       {
         type,
         amount: mongoose.Types.Decimal128.fromString(amount.toString()),
         category,
-        date: new Date(date),
+        date: updatedDate, // Use merged date (new date + old time)
         description,
         isRecurring: isRecurring === "on" || isRecurring === true,
         recurringInterval: (isRecurring === "on" || isRecurring === true) ? recurringInterval : null,
@@ -295,11 +308,13 @@ router.put("/transaction/:transactionId", isLoggedIn, async (req, res, next) => 
     next(err);
   }
 });
+
+
 // DELETE /api/dashboard/:accountId/transaction/:transactionId
 router.delete("/transaction/:transactionId", isLoggedIn, async (req, res, next) => {
   const { accountId, transactionId } = req.params;
   const userId = req.session.userId;
-  console.log(`DELETE request received for transaction ID: ${transactionId}`);
+  // console.log(`DELETE request received for transaction ID: ${transactionId}`);
   if (!userId) {
     return next(new CustomError(401, "User not authenticated."));
   }
@@ -378,7 +393,7 @@ router.delete("/transaction/:transactionId", isLoggedIn, async (req, res, next) 
     // Abort the transaction on error
     await session.abortTransaction();
     session.endSession();
-    console.error("Error deleting transaction:", error);
+    // console.error("Error deleting transaction:", error);
     next(new CustomError(500, "Failed to delete transaction"));
   }
 });

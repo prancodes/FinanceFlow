@@ -4,9 +4,9 @@ import { Link } from 'react-router-dom'
 const HeroSection = () => {
   return (
     <div>
-      <header className="flex flex-col items-center text-center px-8 pb-12 lg:pb-24 lg:pt-15 max-w-6xl mx-auto">
+      <header className="flex flex-col items-center text-center md:px-8 px-2 pb-12 lg:pb-24 pt-10 lg:pt-15 max-w-6xl mx-auto">
         <div className="w-full max-w-3xl">
-      <h1 className=" text-2xl md:text-6xl font-extrabold leading-tight text-center whitespace-nowrap overflow-visible w-full inline-block px-4">
+      <h1 className=" text-2xl md:text-6xl font-extrabold leading-tight text-center whitespace-nowrap overflow-visible w-full inline-block">
         <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
           Manage Your Finances
         </span>
@@ -21,8 +21,8 @@ const HeroSection = () => {
             analyze, and optimize your spending with real-time insights.
           </p>
       
-          <div className="flex flex-col sm:flex-row sm:justify-center gap-4 mt-6">
-            <Link to="/signup" className="bg-black text-white px-6 py-3 rounded-md hover:bg-gray-800 transition font-semibold">
+          <div className="flex flex-col sm:flex-row sm:justify-center items-center gap-4 mt-6">
+            <Link to="/dashboard" className="bg-black text-white px-6 py-3 max-w-fit rounded-md hover:bg-gray-800 transition font-semibold">
               Get Started
             </Link>
           </div>
@@ -30,7 +30,7 @@ const HeroSection = () => {
       
         {/* Image Below the Text */}
         <div className="w-full flex justify-center mt-10">
-          <img src="./banner.jpeg" alt="AI Finance Robot" className="w-full max-w-3xl object-cover" />
+          <img src="./banner.jpeg" alt="AI Finance Robot" className="w-full max-w-3xl object-cover rounded-lg" />
         </div>
       </header>
     </div>

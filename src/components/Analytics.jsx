@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Bar, Line, Pie } from "react-chartjs-2";
 import axios from "axios";
 import ErrorMessage from '../components/ErrorMessage';
+import GraphSkeleton from "../skeletons/GraphSkeleton";
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -31,58 +33,44 @@ ChartJS.register(
 const Analytics = () => {
   const { accountId } = useParams();
   const navigate = useNavigate();
-  const [data, setData] = useState({
-    initialBalance: 0,
-    currentBalance: 0,
-    expensesByCategory: {},
-    monthlySpending: {},
-  });
+  const [data, setData] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState("");
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [availableYears, setAvailableYears] = useState([]);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuthAndInitialize = async () => {
       try {
-        const response = await fetch('/api/checkAuth');
-        if (response.ok) {
-          setIsAuthenticated(true);
-        } else {
+        // Check authentication
+        const authResponse = await fetch('/api/checkAuth');
+        if (!authResponse.ok) {
           navigate('/login');
+          return;
+        }
+        setIsAuthenticated(true);
+
+        // Fetch data
+        const yearsResponse = await axios.get(`/api/dashboard/${accountId}/available-years`);
+        const analyticsResponse = await axios.get(`/api/dashboard/${accountId}/analytics`, {
+          params: { year: selectedYear },
+        });
+
+        setAvailableYears(yearsResponse.data.years);
+        setData(analyticsResponse.data);
+        if (yearsResponse.data.years.length > 0) {
+          setSelectedYear(yearsResponse.data.years[0]);
         }
       } catch (error) {
-        setError("Error checking authentication.");
-        navigate('/login');
+        setError("Error loading analytics data");
+      } finally {
+        setIsInitializing(false);
       }
     };
-    checkAuth();
-  }, [navigate]);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchAvailableYears();
-      fetchAnalyticsData();
-    }
-  }, [accountId, isAuthenticated]);
-
-  useEffect(() => {
-    if (isAuthenticated && selectedYear) {
-      fetchAnalyticsData();
-    }
-  }, [selectedYear]);
-
-  const fetchAvailableYears = async () => {
-    try {
-      const response = await axios.get(`/api/dashboard/${accountId}/available-years`);
-      setAvailableYears(response.data.years);
-      if (response.data.years.length > 0) {
-        setSelectedYear(response.data.years[0]); // Set the latest year as default
-      }
-    } catch (error) {
-      setError("Error fetching available years.");
-    }
-  };
+    checkAuthAndInitialize();
+  }, [accountId, navigate]);
 
   const fetchAnalyticsData = async () => {
     try {
@@ -91,9 +79,19 @@ const Analytics = () => {
       });
       setData(response.data);
     } catch (error) {
-      setError("Error fetching analytics data.");
+      setError("Error fetching updated analytics data.");
     }
   };
+
+  useEffect(() => {
+    if (selectedYear && !isInitializing) {
+      fetchAnalyticsData();
+    }
+  }, [selectedYear]);
+
+  if (!isAuthenticated || isInitializing || !data) {
+    return <GraphSkeleton />;
+  }
 
   const CHART_COLORS = ["#FF6384", "#36A2EB", "#FFCE56", "#9966FF"];
 
@@ -147,7 +145,7 @@ const Analytics = () => {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md space-y-8">
+    <div className="p-6 bg-white rounded-lg shadow-md lg:mt-6 space-y-8">
       <ErrorMessage message={error} onClose={() => setError('')} />
       <h1 className="text-3xl font-bold text-gray-800">Financial Analytics</h1>
 
