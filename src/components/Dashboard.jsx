@@ -41,7 +41,7 @@ const Dashboard = () => {
       try {
         if (!dataPromise) dataPromise = fetchData();
         const data = await dataPromise;
-        
+
         if (data) {
           setUserData(data);
           setIsAuthenticated(true);
@@ -92,10 +92,10 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gray-100 lg:p-6">
       <div className="max-w-4xl mx-auto bg-white lg:p-8 p-6 rounded-lg shadow-lg">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-blue-600">
+          <h1 className="text-3xl font-bold text-center text-blue-600 mb-2 sm:block flex flex-col">
             Welcome, {userData.name}!
           </h1>
-          <Link 
+          <Link
             to="/dashboard/addAccount"
             className="px-4 py-2 mt-3 md:mt-0 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
           >
@@ -118,9 +118,14 @@ const Dashboard = () => {
                   >
                     <h3 className="text-xl font-medium">{account.name}</h3>
                     <p className="text-gray-600">Type: {account.type}</p>
-                    <p className="text-gray-600">
-                      Balance: ₹{parseFloat(account.balance.toString()).toFixed(2)}
-                    </p>
+                    {Number(account.balance).toFixed(2) < 0 ? (
+                      <p className="text-red-600">
+                        Balance: ₹{Number(account.balance).toFixed(2)}
+                      </p>) : (
+                      <p className="text-green-700">
+                        Balance: ₹{Number(account.balance).toFixed(2)}
+                      </p>
+                    )}
                     <FaArrowRight className="inline-block absolute right-4 bottom-4" size={18} />
                   </div>
                   <button

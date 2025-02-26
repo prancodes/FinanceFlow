@@ -124,6 +124,7 @@ const EditTransaction = () => {
               type="number"
               name="transaction[amount]"
               className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200"
+              min={1}
               placeholder="0.00"
               value={transaction.amount}
               onChange={(e) => setTransaction({ ...transaction, amount: e.target.value })}

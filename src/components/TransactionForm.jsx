@@ -182,6 +182,7 @@ const TransactionForm = () => {
           <input
             type="number"
             className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200"
+            min={1}
             placeholder="0.00"
             value={formData.amount}
             onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
