@@ -99,7 +99,7 @@ const App = () => {
           <Route
             path="*"
             element={
-              <h1 className="text-red-500 text-center">404: Page Not Found</h1>
+              <h1 className="text-red-500 text-center mt-8">404: Page Not Found</h1>
             }
           />
         </Routes>
