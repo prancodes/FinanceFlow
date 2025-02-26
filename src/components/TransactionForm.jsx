@@ -137,7 +137,7 @@ const TransactionForm = () => {
 
   return (
     <div>
-      <form onSubmit={handleSubmit} className="max-w-2xl mx-auto mt-8 p-6 bg-white rounded-xl">
+      <form onSubmit={handleSubmit} className="max-w-2xl mx-auto lg:mt-8 mt-3 p-6 bg-white rounded-xl">
         <h2 className="text-4xl font-bold text-blue-600 mb-4">Add Transaction</h2>
         <ErrorMessage message={error} onClose={() => setError('')} />
 

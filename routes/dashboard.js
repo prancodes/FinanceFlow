@@ -26,7 +26,8 @@ router.get("/", isLoggedIn, async (req, res, next) => {
 
     res.json({
       name: user.name,
-      accounts: user.accounts.map(account => ({
+      // Reverse accounts array to show most recent first
+      accounts: user.accounts.reverse().map(account => ({
         ...account.toObject(),
         balance: parseFloat(account.balance.toString())
       })),
@@ -53,7 +54,8 @@ router.get("/:accountId", isLoggedIn, async (req, res, next) => {
       ...account.toObject(),
       initialBalance: parseFloat(account.initialBalance.toString()),
       balance: parseFloat(account.balance.toString()),
-      transactions: account.transactions.map(txn => ({
+      // Reverse transactions array to show most recent first
+      transactions: account.transactions.reverse().map(txn => ({
         ...txn.toObject(),
         amount: parseFloat(txn.amount.toString())
       }))
@@ -93,6 +95,8 @@ router.post("/addAccount", isLoggedIn, async (req, res, next) => {
     next(error);
   }
 });
+
+// Delete account
 router.delete("/:accountId", isLoggedIn, async (req, res, next) => {
   const { accountId } = req.params;
   const userId = req.session.userId;

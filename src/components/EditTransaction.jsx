@@ -98,7 +98,7 @@ const EditTransaction = () => {
     <div>
       <form
         onSubmit={handleSubmit}
-        className="max-w-2xl mx-auto mt-7 p-6 bg-white rounded-xl"
+        className="max-w-2xl mx-auto lg:mt-7 mt-3 p-6 bg-white rounded-xl"
       >
         <h2 className="text-4xl font-bold text-blue-600 mb-4">Edit Transaction</h2>
         <ErrorMessage message={error} onClose={() => setError('')} />
