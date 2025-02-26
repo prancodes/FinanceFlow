@@ -31,14 +31,10 @@ const base = process.env.BASE || "/";
 // Create Express app
 const app = express();
 
-// Increase the request size limit
-app.use(express.json({ limit: "5mb" }));
-app.use(express.urlencoded({ limit: "5mb", extended: true }));
-
-// Middleware setup
-app.use(express.json());
+// Middleware setup 
+app.use(express.json({ limit: "5mb" })); // Increase the request size limit
 app.use(cookieParser());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ limit: "5mb", extended: true }));
 app.use(express.static(path.join(process.cwd(), "public")));
 
 // Session configuration
