@@ -43,7 +43,7 @@ const Navbar = () => {
         {/* Logo */}
         <Link to="/" className="flex items-center">
           <img
-            src="/FinanceFlow.png"
+            src="./FinanceFlowLogo.webp"
             alt="FinanceFlow"
             className="h-8 w-auto"
           />

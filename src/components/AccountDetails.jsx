@@ -100,7 +100,6 @@ const AccountDetail = () => {
         setError(errorData.message || "Failed to delete transaction");
       }
     } catch (error) {
-      // console.error("Error deleting transaction:", error);
       setError("An error occurred while deleting the transaction");
     }
   };
@@ -113,8 +112,8 @@ const AccountDetail = () => {
     <div className="min-h-screen bg-gray-100 lg:p-6">
       <div className="max-w-4xl mx-auto bg-white lg:p-8 p-6 rounded-lg shadow-lg">
         <ErrorMessage message={error} onClose={() => setError('')} />
-        <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
-          '{account.name}' Account Details
+        <h1 className="text-3xl font-bold text-center text-blue-600 mb-6 sm:block flex flex-col">
+          '{account.name}' <span>Account Details</span>
         </h1>
         <div className='flex items-center justify-center'>
           <button
@@ -131,14 +130,15 @@ const AccountDetail = () => {
         <p className="text-lg text-gray-700 mb-4">
           <strong>Initial Balance:</strong> ₹{Number(account.initialBalance).toFixed(2)}
         </p>
-        {Number(account.balance).toFixed(2) < 0 ?(
+        {Number(account.balance).toFixed(2) < 0 ? (
           <p className="text-lg text-red-700 mb-4">
-          <strong>Balance:</strong> ₹{Number(account.balance).toFixed(2)}
-        </p>):(
-          <p className="text-lg text-gray-700 mb-4">
-          <strong>Balance:</strong> ₹{Number(account.balance).toFixed(2)}
-        </p>
-        ) }
+            <strong>Balance:</strong> ₹{Number(account.balance).toFixed(2)}
+          </p>
+        ) : (
+          <p className="text-lg text-green-700 mb-4">
+            <strong>Balance:</strong> ₹{Number(account.balance).toFixed(2)}
+          </p>
+        )}
         
         <div className="mt-6">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">Transactions</h2>
@@ -146,35 +146,40 @@ const AccountDetail = () => {
             {account.transactions && account.transactions.length > 0 ? (
               account.transactions.map((txn) => {
                 const transactionDate = new Date(txn.date);
+                const amount = txn.type === 'Expense' 
+                  ? -Math.abs(txn.amount) 
+                  : Math.abs(txn.amount);
+                
                 return (
                   <li key={txn._id} className="bg-gray-50 p-4 rounded-lg shadow-md">
-                    <p className="text-gray-600 mb-1">
-                      <strong>Amount:</strong> ₹{Number(txn.amount).toFixed(2)}
+                    <p className={`${txn.type === 'Expense' ? 'text-red-600' : 'text-green-800'} mb-1`}>
+                      <strong>Amount:</strong> ₹{amount.toFixed(2)}
                     </p>
                     <div className="flex justify-between items-center mb-1">
                       <span className="text-gray-600">
-                        <strong>Type:</strong> {txn.type}
+                        <strong>Category:</strong> {txn.category}
                       </span>
-                    <div className='flex gap-2'>
-                      <Link to={`/dashboard/${account._id}/transaction/${txn._id}/edit`} className="cursor-pointer">
-                      <FaEdit size={18} />
-                      </Link>
-                    <button    onClick={() => handleDeleteTransaction(txn._id, txn.type, parseFloat(txn.amount.toString()))} className='hover:cursor-pointer'>
-                      <FaTrash size={18} />
-                    </button>
-                    </div>
+                      <div className='flex gap-2'>
+                        <Link to={`/dashboard/${account._id}/transaction/${txn._id}/edit`} className="cursor-pointer">
+                          <FaEdit size={18} />
+                        </Link>
+                        <button onClick={() => handleDeleteTransaction(txn._id, txn.type, parseFloat(txn.amount.toString()))} 
+                                className='hover:cursor-pointer'>
+                          <FaTrash size={18} />
+                        </button>
+                      </div>
                     </div>
                     <p className="text-gray-600">
-                      <strong>Date:</strong>
-                    {`
-                      ${String(transactionDate.getDate()).padStart(2, '0')}/${String(transactionDate.getMonth() + 1).padStart(2, '0')}/${transactionDate.getFullYear()}
-                      ${transactionDate.toLocaleTimeString('en-US', {
-                        hour: 'numeric',
-                        minute: '2-digit',
-                        second: '2-digit',
-                        hour12: true
-                      })}
-                    `}
+                      <strong>Date: </strong> {`
+                        ${String(transactionDate.getDate()).padStart(2, '0')}/${String(transactionDate.getMonth() + 1).padStart(2, '0')}/${transactionDate.getFullYear()}
+                        
+                        ${transactionDate.toLocaleTimeString('en-US', {
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          second: '2-digit',
+                          hour12: true
+                        })}
+                      `}
                     </p>
                   </li>
                 );
