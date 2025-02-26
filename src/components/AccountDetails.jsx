@@ -131,9 +131,15 @@ const AccountDetail = () => {
         <p className="text-lg text-gray-700 mb-4">
           <strong>Initial Balance:</strong> ₹{Number(account.initialBalance).toFixed(2)}
         </p>
-        <p className="text-lg text-gray-700 mb-4">
+        {Number(account.balance).toFixed(2) < 0 ?(
+          <p className="text-lg text-red-700 mb-4">
+          <strong>Balance:</strong> ₹{Number(account.balance).toFixed(2)}
+        </p>):(
+          <p className="text-lg text-gray-700 mb-4">
           <strong>Balance:</strong> ₹{Number(account.balance).toFixed(2)}
         </p>
+        ) }
+        
         <div className="mt-6">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">Transactions</h2>
           <ul className="space-y-4">
