@@ -35,7 +35,8 @@ const app = express();
 app.use(express.json({ limit: "5mb" })); // Increase the request size limit
 app.use(cookieParser());
 app.use(express.urlencoded({ limit: "5mb", extended: true }));
-app.use(express.static(path.join(process.cwd(), "public")));
+app.use(express.static(path.join(process.cwd(), "dist")));
+// app.use(express.static(path.join(process.cwd(), "public")));
 
 // Session configuration
 const store = MongoStore.create({
