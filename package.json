@@ -46,6 +46,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "cross-env": "^7.0.3",
     "nodemon": "^3.1.9",
-    "vite": "^6.0.1"
+    "vite": "^6.0.1",
+    "vite-plugin-sitemap": "^0.7.1"
   }
 }
