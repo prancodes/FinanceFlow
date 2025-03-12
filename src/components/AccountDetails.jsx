@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import ErrorMessage from '../components/ErrorMessage';
 import ListSkeleton from '../skeletons/ListSkeleton';
+import { Helmet } from "react-helmet";
 
 // Cache outside component
 let dataPromise = null;
@@ -45,7 +46,7 @@ const AccountDetail = () => {
         if (!dataPromise) {
           dataPromise = fetchAccountData();
         }
-        
+
         const data = await dataPromise;
         setAccount(data);
         setIsAuthenticated(true);
@@ -110,6 +111,9 @@ const AccountDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 lg:p-6">
+      <Helmet>
+        <title>FinanceFlow - Account Details</title>
+      </Helmet>
       <div className="max-w-4xl mx-auto bg-white lg:p-8 p-6 rounded-lg shadow-lg">
         <ErrorMessage message={error} onClose={() => setError('')} />
         <h1 className="text-3xl font-bold text-center text-blue-600 mb-6 sm:block flex flex-col">
@@ -139,17 +143,17 @@ const AccountDetail = () => {
             <strong>Balance:</strong> ₹{Number(account.balance).toFixed(2)}
           </p>
         )}
-        
+
         <div className="mt-6">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">Transactions</h2>
           <ul className="space-y-4">
             {account.transactions && account.transactions.length > 0 ? (
               account.transactions.map((txn) => {
                 const transactionDate = new Date(txn.date);
-                const amount = txn.type === 'Expense' 
-                  ? -Math.abs(txn.amount) 
+                const amount = txn.type === 'Expense'
+                  ? -Math.abs(txn.amount)
                   : Math.abs(txn.amount);
-                
+
                 return (
                   <li key={txn._id} className="bg-gray-50 p-4 rounded-lg shadow-md">
                     <p className={`${txn.type === 'Expense' ? 'text-red-600' : 'text-green-800'} mb-1`}>
@@ -163,8 +167,8 @@ const AccountDetail = () => {
                         <Link to={`/dashboard/${account._id}/transaction/${txn._id}/edit`} className="cursor-pointer">
                           <FaEdit size={18} />
                         </Link>
-                        <button onClick={() => handleDeleteTransaction(txn._id, txn.type, parseFloat(txn.amount.toString()))} 
-                                className='hover:cursor-pointer'>
+                        <button onClick={() => handleDeleteTransaction(txn._id, txn.type, parseFloat(txn.amount.toString()))}
+                          className='hover:cursor-pointer'>
                           <FaTrash size={18} />
                         </button>
                       </div>
@@ -174,11 +178,11 @@ const AccountDetail = () => {
                         ${String(transactionDate.getDate()).padStart(2, '0')}/${String(transactionDate.getMonth() + 1).padStart(2, '0')}/${transactionDate.getFullYear()}
                         
                         ${transactionDate.toLocaleTimeString('en-US', {
-                          hour: 'numeric',
-                          minute: '2-digit',
-                          second: '2-digit',
-                          hour12: true
-                        })}
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                      })}
                       `}
                     </p>
                   </li>

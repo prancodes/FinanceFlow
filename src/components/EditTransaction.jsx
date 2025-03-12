@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ErrorMessage from '../components/ErrorMessage';
 import FormSkeleton from '../skeletons/FormSkeleton';
+import { Helmet } from "react-helmet";
 
 const EditTransaction = () => {
   const { accountId, transactionId } = useParams();
@@ -96,6 +97,9 @@ const EditTransaction = () => {
 
   return (
     <div>
+      <Helmet>
+        <title>FinanceFlow - Edit Transaction</title>
+      </Helmet>
       <form
         onSubmit={handleSubmit}
         className="max-w-2xl mx-auto lg:mt-7 mt-3 p-6 bg-white rounded-xl"
@@ -183,16 +187,14 @@ const EditTransaction = () => {
           </div>
           <button
             type="button"
-            className={`relative inline-flex items-center w-10 h-6 rounded-full transition-colors ${
-              transaction.isRecurring ? 'bg-blue-500' : 'bg-gray-300'
-            }`}
+            className={`relative inline-flex items-center w-10 h-6 rounded-full transition-colors ${transaction.isRecurring ? 'bg-blue-500' : 'bg-gray-300'
+              }`}
             onClick={() => setTransaction({ ...transaction, isRecurring: !transaction.isRecurring })}
             disabled={isSubmitting}
           >
             <span
-              className={`inline-block w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
-                transaction.isRecurring ? 'translate-x-5' : 'translate-x-1'
-              }`}
+              className={`inline-block w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${transaction.isRecurring ? 'translate-x-5' : 'translate-x-1'
+                }`}
             ></span>
           </button>
         </div>
@@ -224,8 +226,8 @@ const EditTransaction = () => {
           >
             Cancel
           </button>
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="w-1/2 px-4 py-2 rounded-lg bg-gray-800 hover:bg-black text-white disabled:bg-gray-600 relative"
             disabled={isSubmitting}
           >
