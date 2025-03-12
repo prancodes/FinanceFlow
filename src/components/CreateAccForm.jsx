@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ErrorMessage from '../components/ErrorMessage';
 import FormSkeleton from '../skeletons/FormSkeleton';
+import { Helmet } from "react-helmet";
 
 const CreateAccForm = () => {
   const [name, setName] = useState('');
@@ -69,18 +70,21 @@ const CreateAccForm = () => {
 
   return (
     <div className="flex items-center justify-center lg:mt-8 bg-gray-100 lg:px-4">
+      <Helmet>
+        <title>FinanceFlow - Create Your Account</title>
+      </Helmet>
       <div className="w-full max-w-sm sm:max-w-md bg-white p-6 rounded-lg shadow-md">
         <form onSubmit={handleSubmit}>
           <ErrorMessage message={error} onClose={() => setError('')} />
           <label className="mb-5 block text-2xl font-bold text-gray-900">Create New Account</label>
-          
+
           <div className="mb-5">
             <label htmlFor="accName" className="block mb-2 text-sm font-medium text-gray-900">Account Name</label>
-            <input 
-              type="text" 
-              id="accName" 
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" 
-              placeholder="Eg: College Expenses" 
+            <input
+              type="text"
+              id="accName"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              placeholder="Eg: College Expenses"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -90,9 +94,9 @@ const CreateAccForm = () => {
 
           <div className="mb-5">
             <label htmlFor="accType" className="block mb-2 text-sm font-medium text-gray-900">Account Type</label>
-            <select 
-              id="accType" 
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" 
+            <select
+              id="accType"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
               value={type}
               onChange={(e) => setType(e.target.value)}
               required
@@ -106,11 +110,11 @@ const CreateAccForm = () => {
 
           <div className="mb-5">
             <label htmlFor="initBalance" className="block mb-2 text-sm font-medium text-gray-900">Initial Balance</label>
-            <input 
-              type="number" 
-              id="initBalance" 
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" 
-              placeholder="0.00" 
+            <input
+              type="number"
+              id="initBalance"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              placeholder="0.00"
               min={1}
               value={balance}
               onChange={(e) => setBalance(e.target.value)}
@@ -121,8 +125,8 @@ const CreateAccForm = () => {
 
           <div className="flex justify-center mb-5">
             <div className="flex items-center h-5">
-              <input 
-                id="terms" 
+              <input
+                id="terms"
                 type="checkbox"
                 className="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-3 focus:ring-blue-300"
                 required
@@ -135,8 +139,8 @@ const CreateAccForm = () => {
           </div>
 
           <div className="flex justify-center">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center disabled:bg-blue-300 relative"
               disabled={isSubmitting}
             >

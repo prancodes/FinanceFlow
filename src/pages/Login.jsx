@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import ErrorMessage from '../components/ErrorMessage';
+import { Helmet } from "react-helmet";
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -40,6 +41,9 @@ const Login = () => {
 
   return (
     <div className="flex items-center justify-center lg:my-10 bg-gray-100 lg:px-4">
+      <Helmet>
+        <title>FinanceFlow - Login to Your Account</title>
+      </Helmet>
       <div className="w-full max-w-sm sm:max-w-md bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-center text-xl sm:text-2xl font-semibold text-gray-700 mb-6">
           FinanceFlow
@@ -48,7 +52,7 @@ const Login = () => {
           Login
         </h3>
         <ErrorMessage message={error} onClose={() => setError('')} />
-        
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="email" className="block text-gray-700">

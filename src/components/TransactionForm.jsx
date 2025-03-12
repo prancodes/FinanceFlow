@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { FaUpload } from 'react-icons/fa';
 import ErrorMessage from '../components/ErrorMessage';
 import FormSkeleton from '../skeletons/FormSkeleton';
+import { Helmet } from "react-helmet";
 
 const TransactionForm = () => {
   const { accountId } = useParams();
@@ -44,7 +45,7 @@ const TransactionForm = () => {
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.accept = 'image/*';
-    
+
     fileInput.onchange = async (e) => {
       const file = e.target.files[0];
       if (!file) {
@@ -72,7 +73,7 @@ const TransactionForm = () => {
         });
 
         if (!response.ok) throw new Error("Failed to scan receipt");
-        
+
         const result = await response.json();
         const parsedData = result.data;
 
@@ -107,7 +108,7 @@ const TransactionForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       const response = await fetch(`/api/dashboard/${accountId}/transaction`, {
         method: 'POST',
@@ -137,11 +138,14 @@ const TransactionForm = () => {
 
   return (
     <div>
+      <Helmet>
+        <title>FinanceFlow - Add Transaction</title>
+      </Helmet>
       <form onSubmit={handleSubmit} className="max-w-2xl mx-auto lg:mt-8 mt-3 p-6 bg-white rounded-xl">
         <h2 className="text-4xl font-bold text-blue-600 mb-4">Add Transaction</h2>
         <ErrorMessage message={error} onClose={() => setError('')} />
 
-        <button 
+        <button
           type="button"
           className="mb-2 w-full px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg hover:from-pink-600 hover:to-purple-600 transition-colors flex items-center justify-center"
           onClick={handleScanWithAI}
@@ -240,16 +244,14 @@ const TransactionForm = () => {
           </div>
           <button
             type="button"
-            className={`relative inline-flex items-center w-10 h-6 rounded-full transition-colors ${
-              formData.isRecurring ? 'bg-blue-500' : 'bg-gray-300'
-            }`}
+            className={`relative inline-flex items-center w-10 h-6 rounded-full transition-colors ${formData.isRecurring ? 'bg-blue-500' : 'bg-gray-300'
+              }`}
             onClick={() => setFormData({ ...formData, isRecurring: !formData.isRecurring })}
             disabled={isLoading}
           >
             <span
-              className={`inline-block w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
-                formData.isRecurring ? 'translate-x-5' : 'translate-x-1'
-              }`}
+              className={`inline-block w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${formData.isRecurring ? 'translate-x-5' : 'translate-x-1'
+                }`}
             ></span>
           </button>
         </div>

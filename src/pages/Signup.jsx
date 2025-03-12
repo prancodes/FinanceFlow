@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import ErrorMessage from '../components/ErrorMessage';
+import { Helmet } from "react-helmet";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -49,6 +50,9 @@ const Signup = () => {
 
   return (
     <div className="flex items-center justify-center lg:my-8 bg-gray-100 lg:px-4">
+      <Helmet>
+        <title>FinanceFlow - Signup to Manage Your Finances</title>
+      </Helmet>
       <div className="w-full max-w-sm sm:max-w-md bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-center text-xl sm:text-2xl font-semibold text-gray-700 mb-6">
           FinanceFlow

@@ -19,10 +19,10 @@ const LandingPage = () => {
       {/* Stats Section */}
       <div className="py-3 md:p-6 bg-blue-50 text-center grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatsCard label="Active Users" value="100+" />
-        <StatsCard 
-        icon={FaCheckCircle} 
-        label="Secure & Reliable" 
-        value="100%" 
+        <StatsCard
+          icon={FaCheckCircle}
+          label="Secure & Reliable"
+          value="100%"
         />
         <StatsCard label="Uptime" value="99.9%" />
         <StatsCard label="User Rating" value="4.9/5" />
@@ -30,50 +30,51 @@ const LandingPage = () => {
 
       {/* Features Section */}
       <div className="px-4 py-8 md:p-8">
-        <h2 className="text-2xl font-semibold text-center mb-6">
+        <h1 className="text-2xl font-semibold text-center mb-6">
           Everything you need to manage your finances
-        </h2>
+        </h1>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <FeatureCard
             icon={FaChartBar}
             title="Advanced Analytics"
-            desc="Get detailed insights into your spending patterns with AI-powered analytics"
+            desc="Gain detailed insights into your spending patterns with our AI-powered analytics. Understand where your money goes, identify trends, and make data-driven decisions."
           />
           <FeatureCard
             icon={FaReceipt}
             title="Smart Receipt Scanner"
-            desc="Extract data automatically from receipts using advanced AI technology"
+            desc="Automatically extract data from your receipts using advanced AI technology. Save time by eliminating manual data entry and ensure your expense tracking is accurate."
           />
           <FeatureCard
             icon={FaChartPie}
             title="Budget Planning"
-            desc="Create and manage budgets with intelligent recommendations"
+            desc="Create and manage budgets with intelligent recommendations. Set spending limits, monitor variances, and get personalized advice to help you save more."
           />
         </div>
       </div>
 
       {/* Working Section */}
       <div className="px-4 py-8 md:p-8 bg-gray-100">
-        <h2 className="text-2xl font-semibold text-center mb-6">
+        <h1 className="text-2xl font-semibold text-center mb-6">
           How It Works
-        </h2>
+        </h1>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <FeatureCard
             icon={FaClipboardList}
             title="Step 1: Add Transactions"
-            desc="Log your expenses and incomes easily."
+            desc="Easily log your expenses and incomes with our user-friendly, intuitive interface designed for efficiency."
           />
           <FeatureCard
             icon={FaMoneyBillWave}
             title="Step 2: Get Insights"
-            desc="AI-driven analytics to understand spending."
+            desc="Our AI-driven analytics thoroughly process your data, providing actionable insights and comprehensive, detailed reports."
           />
           <FeatureCard
             icon={FaCheckCircle}
             title="Step 3: Optimize Finances"
-            desc="Receive smart recommendations to save more."
+            desc="Get smart recommendations from your spending data to optimize budgets and boost financial health."
           />
         </div>
+
       </div>
 
       {/* Reviews Section */}

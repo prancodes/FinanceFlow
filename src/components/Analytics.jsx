@@ -4,6 +4,7 @@ import { Bar, Line, Pie } from "react-chartjs-2";
 import axios from "axios";
 import ErrorMessage from '../components/ErrorMessage';
 import GraphSkeleton from "../skeletons/GraphSkeleton";
+import { Helmet } from "react-helmet";
 
 import {
   Chart as ChartJS,
@@ -146,6 +147,9 @@ const Analytics = () => {
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md lg:mt-6 space-y-8">
+      <Helmet>
+        <title>FinanceFlow - Analytics & Insights</title>
+      </Helmet>
       <ErrorMessage message={error} onClose={() => setError('')} />
       <h1 className="text-3xl font-bold text-gray-800">Financial Analytics</h1>
 
