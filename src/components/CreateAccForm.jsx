@@ -130,7 +130,7 @@ const CreateAccForm = () => {
               />
             </div>
             <label htmlFor="terms" className="ml-2 text-sm font-medium text-gray-900">
-              I agree with the <a href="#" className="text-blue-600 hover:underline">terms and conditions</a>
+              I'm ready to manage my <span className="text-blue-600 font-semibold">Finances.</span>
             </label>
           </div>
 
