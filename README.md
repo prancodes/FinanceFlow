@@ -1,33 +1,34 @@
 # FinanceFlow
 
-FinanceFlow is a financial management application that helps you track your income, expenses, and investments.
+FinanceFlow is an AI-powered financial management platform designed to help individuals and small businesses effortlessly track, analyze, and optimize their spending with real-time insights.
 
-## Installation
+## Project Overview
 
-Follow these steps to install FinanceFlow:
+FinanceFlow offers an intuitive and user-friendly dashboard that simplifies the complexities of financial management. Key features include:
 
-1. **Clone the repository:**
-   ```sh
-   git clone https://github.com/prancodes/FinanceFlow.git
-   cd FinanceFlow
-   ```
+- **Advanced Analytics:**  
+  Get detailed insights into your spending patterns, identify trends, and make informed financial decisions with AI-driven analytics.
 
-2. **Check out the `ssr-app` branch:**
-   ```sh
-   git checkout ssr-app
-   ```
+- **Smart Receipt Scanner:**  
+  Automatically extract and record data from receipts, reducing manual effort and improving expense accuracy.
 
-3. **Install dependencies:**
-   ```sh
-   npm install
-   ```
+- **Budget Planning:**  
+  Set, manage, and optimize your budgets with intelligent recommendations tailored to your spending habits.
 
-4. **Start the application:**
-   ```sh
-   npm run dev
-   ```
+- **User-Centric Dashboard:**  
+  Easily manage accounts and transactions through a dynamic dashboard built with modern web technologies.
 
-5. **Access the application:**
-   Open your browser and navigate to `http://localhost:8080`.
+## Technology Stack
 
----
+- **Frontend:**  
+  Built with React and Vite SSR, ensuring fast performance and an excellent user experience across devices.
+
+- **Backend:**  
+  Powered by Node.js and Express, connecting seamlessly to MongoDB for reliable data storage and real-time data processing.
+
+- **SEO & Performance:**  
+  Optimized with dynamic meta tags, structured data, automated sitemap generation, and responsive design techniques to ensure high visibility on search engines.
+
+FinanceFlow is committed to delivering a secure and efficient platform that empowers users to take control of their financial future through intelligent data insights and streamlined management tools.
+
+© 2025 FinanceFlow. All rights reserved.
