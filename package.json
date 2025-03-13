@@ -1,0 +1,53 @@
+{
+  "name": "financeflow",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "nodemon server",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "vite build --outDir dist/client",
+    "build:server": "vite build --ssr src/entry-server.jsx --outDir dist/server",
+    "preview": "cross-env NODE_ENV=production node server"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@google/generative-ai": "^0.22.0",
+    "@tailwindcss/vite": "^4.0.7",
+    "axios": "^1.7.9",
+    "bcrypt": "^5.1.1",
+    "chart.js": "^4.4.8",
+    "compression": "^1.7.5",
+    "connect-mongo": "^5.1.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.7",
+    "express": "^5.0.1",
+    "express-session": "^1.18.1",
+    "handlebars": "^4.7.8",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.10.1",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.10.0",
+    "package-name": "^0.1.0",
+    "react": "^18.3.1",
+    "react-chartjs-2": "^5.3.0",
+    "react-dom": "^18.3.1",
+    "react-helmet": "^6.1.0",
+    "react-icons": "^5.5.0",
+    "react-router-dom": "^6.14.1",
+    "sirv": "^3.0.0",
+    "tailwindcss": "^4.0.7"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "cross-env": "^7.0.3",
+    "nodemon": "^3.1.9",
+    "vite": "^6.0.1",
+    "vite-plugin-sitemap": "^0.7.1"
+  }
+}
