@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     sitemap({
-      hostname: 'https://financeflow.app',
+      hostname: 'https://financeflow-b56a.onrender.com',
     })
   ],
 });
