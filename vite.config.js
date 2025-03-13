@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     sitemap({
-      hostname: 'financeflow-url',
+      hostname: 'https://financeflow.app',
     })
   ],
 });
