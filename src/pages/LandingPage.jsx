@@ -30,9 +30,9 @@ const LandingPage = () => {
 
       {/* Features Section */}
       <div className="px-4 py-8 md:p-8">
-        <h1 className="text-2xl font-semibold text-center mb-6">
+        <h2 className="text-2xl font-semibold text-center mb-6">
           Everything you need to manage your finances
-        </h1>
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <FeatureCard
             icon={FaChartBar}
@@ -54,9 +54,9 @@ const LandingPage = () => {
 
       {/* Working Section */}
       <div className="px-4 py-8 md:p-8 bg-gray-100">
-        <h1 className="text-2xl font-semibold text-center mb-6">
+        <h2 className="text-2xl font-semibold text-center mb-6">
           How It Works
-        </h1>
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <FeatureCard
             icon={FaClipboardList}
