@@ -29,6 +29,13 @@ FinanceFlow offers an intuitive and user-friendly dashboard that simplifies the 
 - **SEO & Performance:**  
   Optimized with dynamic meta tags, structured data, automated sitemap generation, and responsive design techniques to ensure high visibility on search engines.
 
+## FinanaceFlow Team
+- [Pranjal Singh](https://github.com/prancodes)
+- [Om Singh](https://github.com/24-droid)
+- [Pushkar Singh](https://github.com/BackpropX)
+- [Vikas Vishwakarma](https://github.com/VikasVk03)
+---
+
 FinanceFlow is committed to delivering a secure and efficient platform that empowers users to take control of their financial future through intelligent data insights and streamlined management tools.
 
 © 2025 FinanceFlow. All rights reserved.
