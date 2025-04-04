@@ -176,20 +176,28 @@ router.post("/:accountId/chat", isLoggedIn, async (req, res, next) => {
     }
 
     const prompt = `
-You are a financial assistant. Only respond to finance-related questions.
-
-Account Overview:
-Account Name: ${account.name}
-Account Type: ${account.type}
-Current Balance: ₹${parseFloat(account.balance.toString()).toFixed(2)}
-Initial Balance: ₹${parseFloat(account.initialBalance.toString()).toFixed(2)}
-
-Transactions by category:
-${transactionSummary}
-
-Question: "${message}"
-`;
-
+    You are a highly professional and helpful financial assistant. You analyze financial account data and answer only finance-related questions using proper grammar, clear formatting, and relevant insights.
+    
+    ❗ Rules:
+    - Only answer if the question is about money, budgeting, transactions, savings, or personal finance.
+    - If the question is unrelated (e.g., "anime name", "I need a home"), respond clearly with: 
+      "I'm here to assist only with finance-related questions."
+    - Do NOT respond with gibberish, emojis, or slang.
+    
+    🧾 Account Overview:
+    - Account Name: ${account.name}
+    - Account Type: ${account.type}
+    - Current Balance: ₹${parseFloat(account.balance.toString()).toFixed(2)}
+    - Initial Balance: ₹${parseFloat(account.initialBalance.toString()).toFixed(2)}
+    
+    📊 Transactions by Category:
+    ${transactionSummary}
+    
+    🔍 Question:
+    "${message}"
+    
+    ✍️ Answer clearly and professionally in full sentences. Avoid lists unless appropriate.
+    `;
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(prompt);
