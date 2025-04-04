@@ -7,6 +7,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import CustomError from '../utils/CustomError.js';
 import { User } from '../models/User.model.js';
+import { sendOtp, WelcomeEmail } from '../middleware/Email.js';
 
 const router = express.Router();
 const jwtSecret = process.env.JWT_SECRET;
@@ -27,19 +28,49 @@ router.post("/signup", async (req, res, next) => {
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      throw new CustomError(400, "Email already Exists");
+      return res.status(400).json({ error: "Email already exists! Please login." });  
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const createdUser = await User.create({
+    const otp= Math.floor(100000 + Math.random() * 900000).toString();
+    req.session.tempUser = {
       name,
       email,
       password: hashedPassword,
+      otp,
+    };
+    sendOtp(email,otp);
+    return res.status(200).json({ success: true, message: "OTP sent to email" });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/verify-using-otp",async(req,res,next)=>{
+  try {
+    const {code}=req.body;
+    if (!req.session.tempUser) {
+      return res.status(400).json({ success: false, message: "Session expired. Please sign up again." });
+    }
+
+    const { name, email, password, otp } = req.session.tempUser;
+    let isVerified;
+    const createdUser = await User.create({
+      name,
+      email,
+      password,
+      isVerified: true, // Mark as verified
     });
-
     req.session.userId = createdUser._id;
-
-    // Generate JWT token and set it in a cookie
+    req.session.tempUser = null;
+    console.log(createdUser);
+    
+    if(!createdUser){
+      return res.status(400).json({success:false,message:"Invalid or Expired Otp"})
+    }
+    createdUser.otp=undefined;
+    await createdUser.save();
+    await WelcomeEmail(createdUser.email,createdUser.name);
     jwt.sign({ userId: createdUser._id, name }, jwtSecret, {}, (err, token) => {
       if (err) {
         return next(new CustomError(500, "JWT error. Please try again later."));
@@ -47,10 +78,13 @@ router.post("/signup", async (req, res, next) => {
       res.cookie("token", token, { sameSite: "none", secure: true });
       res.redirect("/dashboard");
     });
+    return res.status(200).json({success:true,message:"Email Verified Successfully"})
+    // res.redirect("/dashboard");
   } catch (error) {
     next(error);
   }
-});
+})
+
 
 // Login route
 router.post("/login", async (req, res, next) => {
