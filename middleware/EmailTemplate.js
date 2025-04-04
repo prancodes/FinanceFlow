@@ -70,7 +70,7 @@ export const Verification_Email_Template = `
               <p>If you did not create an account, no further action is required. If you have any questions, feel free to contact our support team.</p>
           </div>
           <div class="footer">
-              <p>&copy; ${new Date().getFullYear()} © 2025 FinanceFlow. All rights reserved.</p>
+              <p>&copy; ${new Date().getFullYear()} FinanceFlow. All rights reserved.</p>
           </div>
       </div>
   </body>
@@ -170,7 +170,7 @@ export const Welcome_Email_Template = `
               </p>
           </div>
           <div class="footer">
-              <p>&copy; ${new Date().getFullYear()} © 2025 FinanceFlow. All rights reserved.</p>
+              <p>&copy; ${new Date().getFullYear()} FinanceFlow. All rights reserved.</p>
           </div>
       </div>
   </body>
