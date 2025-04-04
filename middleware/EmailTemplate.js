@@ -70,7 +70,7 @@ export const Verification_Email_Template = `
               <p>If you did not create an account, no further action is required. If you have any questions, feel free to contact our support team.</p>
           </div>
           <div class="footer">
-              <p>&copy; ${new Date().getFullYear()} Your Company. All rights reserved.</p>
+              <p>&copy; ${new Date().getFullYear()} © 2025 FinanceFlow. All rights reserved.</p>
           </div>
       </div>
   </body>
@@ -86,7 +86,7 @@ export const Welcome_Email_Template = `
   <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Welcome to Our Community</title>
+      <title>Welcome to FinanceFlow</title>
       <style>
           body {
               font-family: Arial, sans-serif;
@@ -151,21 +151,26 @@ export const Welcome_Email_Template = `
   </head>
   <body>
       <div class="container">
-          <div class="header">Welcome to Our Community!</div>
+          <div class="header">Welcome to FinanceFlow! We're excited to have you on board. 🎉</div>
           <div class="content">
               <p class="welcome-message">Hello {name},</p>
-              <p>We’re thrilled to have you join us! Your registration was successful, and we’re committed to providing you with the best experience possible.</p>
+              <p>We’re thrilled to have you join us! Your Account was successfully created, and we’re committed to providing you with the best experience possible.</p>
               <p>Here’s how you can get started:</p>
               <ul>
-                  <li>Explore our features and customize your experience.</li>
-                  <li>Stay informed by checking out our blog for the latest updates and tips.</li>
-                  <li>Reach out to our support team if you have any questions or need assistance.</li>
+                  <li>✅ Track your transactions effortlessly.</li>
+                  <li>✅ Gain insights into your spending habits.</li>
+                  <li>✅ Plan and optimize your budget for better savings.</li>
               </ul>
               <a href="#" class="button">Get Started</a>
-              <p>If you need any help, don’t hesitate to contact us. We’re here to support you every step of the way.</p>
+              <p>If you have any questions or need assistance, feel free to reach out to our support team.
+
+                Happy budgeting!
+                The FinanceFlow Team
+                financeflow341@gmail.com
+              </p>
           </div>
           <div class="footer">
-              <p>&copy; ${new Date().getFullYear()} Your Company. All rights reserved.</p>
+              <p>&copy; ${new Date().getFullYear()} © 2025 FinanceFlow. All rights reserved.</p>
           </div>
       </div>
   </body>
