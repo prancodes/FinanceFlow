@@ -7,6 +7,7 @@ import { Transaction } from '../models/Transaction.model.js';
 import CustomError from '../utils/CustomError.js';
 import mongoose from 'mongoose';
 import session from 'express-session';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const router = express.Router();
 
@@ -26,7 +27,6 @@ router.get("/", isLoggedIn, async (req, res, next) => {
 
     res.json({
       name: user.name,
-      // Reverse accounts array to show most recent first
       accounts: user.accounts.reverse().map(account => ({
         ...account.toObject(),
         balance: parseFloat(account.balance.toString())
@@ -37,7 +37,7 @@ router.get("/", isLoggedIn, async (req, res, next) => {
   }
 });
 
-// Render the selected Account related info
+// Render selected account details
 router.get("/:accountId", isLoggedIn, async (req, res, next) => {
   try {
     const userId = req.session.userId;
@@ -45,16 +45,12 @@ router.get("/:accountId", isLoggedIn, async (req, res, next) => {
 
     const { accountId } = req.params;
     const account = await Account.findOne({ _id: accountId, user: userId }).populate("transactions");
-
-    if (!account) {
-      throw new CustomError(404, "Account not found or access denied.");
-    }
+    if (!account) throw new CustomError(404, "Account not found or access denied.");
 
     res.json({
       ...account.toObject(),
       initialBalance: parseFloat(account.initialBalance.toString()),
       balance: parseFloat(account.balance.toString()),
-      // Reverse transactions array to show most recent first
       transactions: account.transactions.reverse().map(txn => ({
         ...txn.toObject(),
         amount: parseFloat(txn.amount.toString())
@@ -65,19 +61,14 @@ router.get("/:accountId", isLoggedIn, async (req, res, next) => {
   }
 });
 
-// Create account route
+// Create new account
 router.post("/addAccount", isLoggedIn, async (req, res, next) => {
   try {
     const userId = req.session.userId;
-    if (!userId) {
-      throw new CustomError(401, "User not authenticated.");
-    }
+    if (!userId) throw new CustomError(401, "User not authenticated.");
 
     const { name, type, balance } = req.body.account;
-    // Validate account type
-    if (!["Current", "Savings"].includes(type)) {
-      throw new CustomError(400, "Invalid account type.");
-    }
+    if (!["Current", "Savings"].includes(type)) throw new CustomError(400, "Invalid account type.");
 
     const newAccount = new Account({
       name,
@@ -101,57 +92,23 @@ router.delete("/:accountId", isLoggedIn, async (req, res, next) => {
   const { accountId } = req.params;
   const userId = req.session.userId;
 
-  // console.log(`DELETE request received for account ID: ${accountId}`); // Log the request
+  if (!userId) return next(new CustomError(401, "User not authenticated"));
 
-  if (!userId) {
-    return next(new CustomError(401, "User not authenticated"));
-  }
-
+  const session = await mongoose.startSession();
   try {
-    // Start a database session for atomic operations
-    const session = await mongoose.startSession();
     session.startTransaction();
 
-    // console.log("Session started"); // Log session start
-
-    // Find the account
     const account = await Account.findById(accountId).session(session);
-    if (!account) {
-      await session.abortTransaction();
-      session.endSession();
-      // console.log("Account not found"); // Log if account is not found
-      return next(new CustomError(404, "Account not found"));
-    }
+    if (!account) throw new CustomError(404, "Account not found");
 
-    // console.log("Account found:", account); // Log the account
-
-    // Find the user
     const user = await User.findById(userId).session(session);
-    if (!user) {
-      await session.abortTransaction();
-      session.endSession();
-      // console.log("User not found"); // Log if user is not found
-      return next(new CustomError(404, "User not found"));
-    }
+    if (!user) throw new CustomError(404, "User not found");
 
-    // console.log("User found:", user); // Log the user
-
-    // Find the budget
     const budget = await Budget.findOne({ user: userId }).session(session);
-    if (!budget) {
-      await session.abortTransaction();
-      session.endSession();
-      // console.log("Budget not found"); // Log if budget is not found
-      return next(new CustomError(404, "Budget not found"));
-    }
+    if (!budget) throw new CustomError(404, "Budget not found");
 
-    // console.log("Budget found:", budget); // Log the budget
-
-    // Delete all transactions associated with the account
     await Transaction.deleteMany({ account: accountId }).session(session);
-    // console.log("Transactions deleted"); // Log transaction deletion
 
-    // Update the budget based on the account balance
     const accountBalance = parseFloat(account.balance.toString());
     if (accountBalance > 0) {
       budget.currentBalance = mongoose.Types.Decimal128.fromString(
@@ -162,33 +119,86 @@ router.delete("/:accountId", isLoggedIn, async (req, res, next) => {
       );
     }
 
-    // console.log("Budget updated:", budget); // Log the updated budget
-
-    // Save the updated budget
     await budget.save({ session });
-    // console.log("Budget saved"); // Log budget save
-
-    // Remove the account from the user's accounts array
     user.accounts.pull(accountId);
     await user.save({ session });
-    // console.log("Account removed from user"); // Log user update
-
-    // Delete the account
     await Account.findByIdAndDelete(accountId).session(session);
-    // console.log("Account deleted"); // Log account deletion
 
-    // Commit the transaction
     await session.commitTransaction();
-    session.endSession();
-    // console.log("Transaction committed"); // Log transaction commit
-
     res.status(200).json({ message: "Account deleted successfully" });
   } catch (error) {
-    // Abort the transaction on error
     await session.abortTransaction();
-    session.endSession();
-    // console.error("Error deleting account:", error); // Log the error
     next(new CustomError(500, "Failed to delete account"));
+  } finally {
+    session.endSession();
   }
 });
+
+// Chatbot route
+router.post("/:accountId/chat", isLoggedIn, async (req, res, next) => {
+  try {
+    const { accountId } = req.params;
+    const userId = req.session.userId;
+    if (!userId) throw new CustomError(401, 'User not authenticated');
+
+    const { message } = req.body;
+    if (!message) return res.json({ success: false, reply: "No message provided." });
+
+    const account = await Account.findOne({ _id: accountId, user: userId }).populate("transactions");
+    if (!account) throw new CustomError(404, "Account not found or access denied.");
+
+    const groupedTransactions = {};
+    for (const txn of account.transactions) {
+      const category = txn.category || "Uncategorized";
+      if (!groupedTransactions[category]) groupedTransactions[category] = [];
+      groupedTransactions[category].push({
+        date: txn.date.toISOString().split("T")[0],
+        type: txn.type,
+        amount: parseFloat(txn.amount.toString()),
+        description: txn.description,
+        isRecurring: txn.isRecurring || false,
+        recurringInterval: txn.recurringInterval || null,
+        nextRecurringDate: txn.nextRecurringDate ? txn.nextRecurringDate.toISOString().split("T")[0] : null,
+        lastProcessed: txn.lastProcessed ? txn.lastProcessed.toISOString().split("T")[0] : null,
+      });
+    }
+
+    let transactionSummary = "";
+    for (const [category, txns] of Object.entries(groupedTransactions)) {
+      transactionSummary += `\n\nCategory: ${category}\n`;
+      txns.forEach((txn, i) => {
+        transactionSummary += `  ${i + 1}. ${txn.date} - ${txn.type} ₹${txn.amount.toFixed(2)} - ${txn.description}`;
+        if (txn.isRecurring) {
+          transactionSummary += ` (Recurring every ${txn.recurringInterval}, Next: ${txn.nextRecurringDate})`;
+        }
+        transactionSummary += `\n`;
+      });
+    }
+
+    const prompt = `
+You are a financial assistant. Only respond to finance-related questions.
+
+Account Overview:
+Account Name: ${account.name}
+Account Type: ${account.type}
+Current Balance: ₹${parseFloat(account.balance.toString()).toFixed(2)}
+Initial Balance: ₹${parseFloat(account.initialBalance.toString()).toFixed(2)}
+
+Transactions by category:
+${transactionSummary}
+
+Question: "${message}"
+`;
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent(prompt);
+    const responseText = await result.response.text();
+
+    res.json({ success: true, reply: responseText });
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default router;

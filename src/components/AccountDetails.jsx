@@ -4,6 +4,7 @@ import { FaEdit, FaTrash } from 'react-icons/fa';
 import ErrorMessage from '../components/ErrorMessage';
 import ListSkeleton from '../skeletons/ListSkeleton';
 import { Helmet } from "react-helmet";
+import FinanceChatbot from '../components/FinanceChatbot';
 
 
 // Cache outside component
@@ -127,7 +128,7 @@ const AccountDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 lg:p-6">
+    <div className="min-h-screen bg-gray-100 lg:p-6 relative">
       <Helmet>
         <title>FinanceFlow - Account Details</title>
       </Helmet>
@@ -226,11 +227,11 @@ const AccountDetail = () => {
                             <strong>Date: </strong> {`
                               ${String(transactionDate.getDate()).padStart(2, '0')}/${String(transactionDate.getMonth() + 1).padStart(2, '0')}/${transactionDate.getFullYear()}
                               ${transactionDate.toLocaleTimeString('en-US', {
-                              hour: 'numeric',
-                              minute: '2-digit',
-                              second: '2-digit',
-                              hour12: true
-                            })}
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                second: '2-digit',
+                                hour12: true
+                              })}
                             `}
                           </p>
                         </li>
@@ -246,6 +247,8 @@ const AccountDetail = () => {
           )}
         </div>
       </div>
+      {/* Floating Finance Chatbot */}
+      <FinanceChatbot account={account} />
     </div>
   );
 };
