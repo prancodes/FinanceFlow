@@ -75,10 +75,10 @@ router.post("/verify-using-otp",async(req,res,next)=>{
       if (err) {
         return next(new CustomError(500, "JWT error. Please try again later."));
       }
-      res.cookie("token", token, { sameSite: "none", secure: true });
-      res.redirect("/dashboard");
+      res.cookie("token", token, { sameSite: "lax", secure: false  });
+      
+      return res.status(200).json({success:true,message:"Email Verified Successfully"})
     });
-    return res.status(200).json({success:true,message:"Email Verified Successfully"})
     // res.redirect("/dashboard");
   } catch (error) {
     next(error);
