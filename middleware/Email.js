@@ -11,7 +11,7 @@ export const sendOtp = async (email, otp) => {
             text: "Verify your Email", // plain text body
             html: Verification_Email_Template.replace("{otp}",otp), // html body
         });
-        console.log("Email sent successfully",response);
+        console.log("OTP sent successfully",response.accepted);
         
     } catch (error) {
         console.log("Email error",error);
@@ -27,7 +27,7 @@ export const WelcomeEmail = async (email, name  ) => {
             text: "Welcome to FinanceFlow", // plain text body
             html: Welcome_Email_Template.replace("{name}",name), // html body
         });
-        console.log("Email sent successfully",response);
+        console.log("Email sent successfully",response.accepted);
         
     } catch (error) {
         console.log("Email error",error);
