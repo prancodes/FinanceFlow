@@ -32,59 +32,69 @@ router.post("/signup", async (req, res, next) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const otp= Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
     req.session.tempUser = {
       name,
       email,
       password: hashedPassword,
       otp,
     };
-    sendOtp(email,otp);
+
+    // Await sendOtp to catch errors
+    await sendOtp(email, otp);
     return res.status(200).json({ success: true, message: "OTP sent to email" });
   } catch (error) {
     next(error);
   }
 });
 
-router.post("/verify-using-otp",async(req,res,next)=>{
+// Verify OTP route with proper OTP comparison
+router.post("/verify-using-otp", async (req, res, next) => {
   try {
-    const {code}=req.body;
+    const { code } = req.body;
     if (!req.session.tempUser) {
       return res.status(400).json({ success: false, message: "Session expired. Please sign up again." });
     }
 
     const { name, email, password, otp } = req.session.tempUser;
-    let isVerified;
+
+    // Compare user-provided OTP with stored OTP
+    if (code !== otp) {
+      throw new CustomError(404, "Invalid OTP. Please try again.");
+    }
+
     const createdUser = await User.create({
       name,
       email,
       password,
-      isVerified: true, // Mark as verified
+      isVerified: true,
     });
+
+    if (!createdUser) {
+      return next(new CustomError(400, "User creation failed. Please try again."));
+    }
+
     req.session.userId = createdUser._id;
     req.session.tempUser = null;
-    console.log(createdUser);
-    
-    if(!createdUser){
-      return res.status(400).json({success:false,message:"Invalid or Expired Otp"})
-    }
-    createdUser.otp=undefined;
+
+    // Optionally clear the otp field if stored
+    createdUser.otp = undefined;
     await createdUser.save();
-    await WelcomeEmail(createdUser.email,createdUser.name);
+
+    await WelcomeEmail(createdUser.email, createdUser.name);
+
     jwt.sign({ userId: createdUser._id, name }, jwtSecret, {}, (err, token) => {
       if (err) {
         return next(new CustomError(500, "JWT error. Please try again later."));
       }
-      res.cookie("token", token, { sameSite: "lax", secure: false  });
-      
-      return res.status(200).json({success:true,message:"Email Verified Successfully"})
+      res.cookie("token", token, { sameSite: "lax", secure: true });
+      return res.status(200).json({ success: true, message: "Email Verified Successfully" });
     });
-    // res.redirect("/dashboard");
   } catch (error) {
     next(error);
   }
-})
-
+});
 
 // Login route
 router.post("/login", async (req, res, next) => {
@@ -102,7 +112,7 @@ router.post("/login", async (req, res, next) => {
         if (err) {
           return next(new CustomError(500, "JWT error. Please try again later."));
         }
-        res.cookie("token", token, { sameSite: "none", secure: true });
+        res.cookie("token", token, { sameSite: "lax", secure: true });
         res.redirect("/dashboard");
       });
     } else {
