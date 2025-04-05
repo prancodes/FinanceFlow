@@ -118,7 +118,7 @@ const Signup = () => {
             >
               {isLoading ? (
                 <>
-                  <span className="invisible">Verify OTP</span>
+                  <span className="invisible">Verify</span>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
                   </div>
