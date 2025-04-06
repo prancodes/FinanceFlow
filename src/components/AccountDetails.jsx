@@ -6,7 +6,6 @@ import ListSkeleton from '../skeletons/ListSkeleton';
 import { Helmet } from "react-helmet";
 import FinanceChatbot from '../components/FinanceChatbot';
 
-
 // Cache outside component
 let dataPromise = null;
 
@@ -103,7 +102,7 @@ const AccountDetail = () => {
             updatedBalance += transactionAmount;
           } else if (transactionType === "Income") {
             updatedInitialBalance -= transactionAmount;
-            updatedBalance -= transactionAmount;
+            updatedBalance -= (transactionAmount * 2);
           }
 
           return {

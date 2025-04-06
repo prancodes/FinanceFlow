@@ -51,33 +51,29 @@ router.post("/transaction", isLoggedIn, async (req, res, next) => {
       currentTime.getSeconds(),
       currentTime.getMilliseconds()
     );
-  //First Set the next Recurring Date to null
-  //Check if the transaction is recurring 
-  //If no then move ahead else set the next Recurring Date to the transaction Date First
-  //Then Based on recurringInterval keep settign the nextRecurringDate
-  let nextRecurringDate=null;
-  if(data.isRecurring){
-    nextRecurringDate=new Date(transactionDate);
-    switch(data.recurringInterval){
-      case "Daily":
-        nextRecurringDate.setDate(nextRecurringDate.getDate() +1);
-        break;
-      
-      case "Weekly":
-        nextRecurringDate.setDate(nextRecurringDate.getDate()+7);
-        break;
 
-      case "Monthly":
-        nextRecurringDate.setMonth(nextRecurringDate.getMonth()+1) ;
-        break;
+    // Set nextRecurringDate if the transaction is recurring
+    let nextRecurringDate = null;
+    if (data.isRecurring) {
+      nextRecurringDate = new Date(transactionDate);
+      switch (data.recurringInterval) {
+        case "Daily":
+          nextRecurringDate.setDate(nextRecurringDate.getDate() + 1);
+          break;
+        case "Weekly":
+          nextRecurringDate.setDate(nextRecurringDate.getDate() + 7);
+          break;
+        case "Monthly":
+          nextRecurringDate.setMonth(nextRecurringDate.getMonth() + 1);
+          break;
+        case "Yearly":
+          nextRecurringDate.setFullYear(nextRecurringDate.getFullYear() + 1);
+          break;
+        default:
+          break;
+      }
+    }
 
-      case "Yearly":
-        nextRecurringDate.setFullYear(nextRecurringDate.getFullYear()+1) ;
-        break;
-      default:
-        break;
-  }
-}
     const newTransaction = new Transaction({
       type: data.type,
       amount: data.amount,
@@ -99,8 +95,9 @@ router.post("/transaction", isLoggedIn, async (req, res, next) => {
         (parseFloat(account.balance.toString()) - amount).toString()
       );
     } else if (data.type === "Income") {
+      // For income, double the addition to current balance, but add normal amount to initial balance.
       account.balance = mongoose.Types.Decimal128.fromString(
-        (parseFloat(account.balance.toString()) + amount).toString()
+        (parseFloat(account.balance.toString()) + (amount * 2)).toString()
       );
       account.initialBalance = mongoose.Types.Decimal128.fromString(
         (parseFloat(account.initialBalance.toString()) + amount).toString()
@@ -147,7 +144,6 @@ router.post("/transaction", isLoggedIn, async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-
 });
 
 // Render Transaction Edit Form
@@ -206,17 +202,18 @@ router.put("/transaction/:transactionId", isLoggedIn, async (req, res, next) => 
         (parseFloat(budget.amount.toString()) + oldAmount).toString()
       );
     } else if (oldTransaction.type === "Income") {
+      // Since income was added as double in current balance, revert by subtracting double the old amount
       account.balance = mongoose.Types.Decimal128.fromString(
-        (parseFloat(account.balance.toString()) - oldAmount).toString()
+        (parseFloat(account.balance.toString()) - (oldAmount * 2)).toString()
       );
       account.initialBalance = mongoose.Types.Decimal128.fromString(
         (parseFloat(account.initialBalance.toString()) - oldAmount).toString()
       );
       budget.currentBalance = mongoose.Types.Decimal128.fromString(
-        (parseFloat(budget.currentBalance.toString()) - oldAmount).toString()
+        (parseFloat(budget.currentBalance.toString()) - (oldAmount * 2)).toString()
       );
       budget.amount = mongoose.Types.Decimal128.fromString(
-        (parseFloat(budget.amount.toString()) - oldAmount).toString()
+        (parseFloat(budget.amount.toString()) - (oldAmount * 2)).toString()
       );
     }
 
@@ -260,7 +257,7 @@ router.put("/transaction/:transactionId", isLoggedIn, async (req, res, next) => 
         type,
         amount: mongoose.Types.Decimal128.fromString(amount.toString()),
         category,
-        date: updatedDate, // Use merged date (new date + old time)
+        date: updatedDate,
         description,
         isRecurring: isRecurring === "on" || isRecurring === true,
         recurringInterval: (isRecurring === "on" || isRecurring === true) ? recurringInterval : null,
@@ -286,16 +283,16 @@ router.put("/transaction/:transactionId", isLoggedIn, async (req, res, next) => 
       );
     } else if (type === "Income") {
       account.balance = mongoose.Types.Decimal128.fromString(
-        (parseFloat(account.balance.toString()) + newAmount).toString()
+        (parseFloat(account.balance.toString()) + (newAmount * 2)).toString()
       );
       account.initialBalance = mongoose.Types.Decimal128.fromString(
         (parseFloat(account.initialBalance.toString()) + newAmount).toString()
       );
       budget.currentBalance = mongoose.Types.Decimal128.fromString(
-        (parseFloat(budget.currentBalance.toString()) + newAmount).toString()
+        (parseFloat(budget.currentBalance.toString()) + (newAmount * 2)).toString()
       );
       budget.amount = mongoose.Types.Decimal128.fromString(
-        (parseFloat(budget.amount.toString()) + newAmount).toString()
+        (parseFloat(budget.amount.toString()) + (newAmount * 2)).toString()
       );
     }
 
@@ -309,22 +306,19 @@ router.put("/transaction/:transactionId", isLoggedIn, async (req, res, next) => 
   }
 });
 
-
-// DELETE /api/dashboard/:accountId/transaction/:transactionId
+// DELETE transaction route
 router.delete("/transaction/:transactionId", isLoggedIn, async (req, res, next) => {
   const { accountId, transactionId } = req.params;
   const userId = req.session.userId;
-  // console.log(`DELETE request received for transaction ID: ${transactionId}`);
   if (!userId) {
     return next(new CustomError(401, "User not authenticated."));
   }
 
+  let session;
   try {
-    // Start a database session for atomic operations
-    const session = await mongoose.startSession();
+    session = await mongoose.startSession();
     session.startTransaction();
 
-    // Find the transaction
     const transaction = await Transaction.findById(transactionId).session(session);
     if (!transaction) {
       await session.abortTransaction();
@@ -332,7 +326,6 @@ router.delete("/transaction/:transactionId", isLoggedIn, async (req, res, next) 
       return next(new CustomError(404, "Transaction not found"));
     }
 
-    // Find the account
     const account = await Account.findById(accountId).session(session);
     if (!account) {
       await session.abortTransaction();
@@ -340,7 +333,6 @@ router.delete("/transaction/:transactionId", isLoggedIn, async (req, res, next) 
       return next(new CustomError(404, "Account not found"));
     }
 
-    // Find the budget
     const budget = await Budget.findOne({ user: userId }).session(session);
     if (!budget) {
       await session.abortTransaction();
@@ -348,10 +340,8 @@ router.delete("/transaction/:transactionId", isLoggedIn, async (req, res, next) 
       return next(new CustomError(404, "Budget not found"));
     }
 
-    // Update balances based on transaction type
     const amount = parseFloat(transaction.amount.toString());
     if (transaction.type === "Expense") {
-      // Add the expense amount back to the balance
       account.balance = mongoose.Types.Decimal128.fromString(
         (parseFloat(account.balance.toString()) + amount).toString()
       );
@@ -362,38 +352,34 @@ router.delete("/transaction/:transactionId", isLoggedIn, async (req, res, next) 
         (parseFloat(budget.amount.toString()) + amount).toString()
       );
     } else if (transaction.type === "Income") {
-      // Subtract the income amount from both initialBalance and balance
       account.initialBalance = mongoose.Types.Decimal128.fromString(
         (parseFloat(account.initialBalance.toString()) - amount).toString()
       );
       account.balance = mongoose.Types.Decimal128.fromString(
-        (parseFloat(account.balance.toString()) - amount).toString()
+        (parseFloat(account.balance.toString()) - (amount * 2)).toString()
       );
       budget.currentBalance = mongoose.Types.Decimal128.fromString(
-        (parseFloat(budget.currentBalance.toString()) - amount).toString()
+        (parseFloat(budget.currentBalance.toString()) - (amount * 2)).toString()
       );
       budget.amount = mongoose.Types.Decimal128.fromString(
-        (parseFloat(budget.amount.toString()) - amount).toString()
+        (parseFloat(budget.amount.toString()) - (amount * 2)).toString()
       );
     }
 
-    // Save the updated account and budget
     await account.save({ session });
     await budget.save({ session });
 
-    // Delete the transaction
     await Transaction.findByIdAndDelete(transactionId).session(session);
 
-    // Commit the transaction
     await session.commitTransaction();
     session.endSession();
 
     res.status(200).json({ message: "Transaction deleted successfully" });
   } catch (error) {
-    // Abort the transaction on error
-    await session.abortTransaction();
-    session.endSession();
-    // console.error("Error deleting transaction:", error);
+    if (session) {
+      await session.abortTransaction();
+      session.endSession();
+    }
     next(new CustomError(500, "Failed to delete transaction"));
   }
 });
