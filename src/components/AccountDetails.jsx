@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaLongArrowAltLeft } from 'react-icons/fa';
 import ErrorMessage from '../components/ErrorMessage';
 import ListSkeleton from '../skeletons/ListSkeleton';
 import { Helmet } from "react-helmet";
@@ -176,9 +176,11 @@ const AccountDetail = () => {
           </div>
 
           <div className="mt-6 mb-6 flex justify-between items-center">
-            <Link to="/dashboard" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors cursor-pointer">
-              Back to Dashboard
+            <Link to="/dashboard" className="text-white bg-blue-600 hover:bg-blue-700 transition-colors cursor-pointer rounded px-3 py-2 flex items-center">
+              <span className="sm:hidden text-white"><FaLongArrowAltLeft size={20} /></span>
+              <span className="hidden sm:inline">Back to Dashboard</span>
             </Link>
+
             <Link
               to={`/dashboard/${account._id}/createTransaction`}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors cursor-pointer"
