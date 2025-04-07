@@ -102,7 +102,7 @@ const FinanceChatbot = ({ account }) => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-5 right-5 bg-gradient-to-r from-[#005AA7] to-[#2E8BC0] hover:from-[#004C91] hover:to-[#267BAF] text-white p-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center transform hover:scale-110"
+          className="fixed bottom-5 right-5 bg-gradient-to-r from-[#005AA7] to-[#2E8BC0] hover:from-[#004C91] hover:to-[#267BAF] text-white p-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center z-[100] transform hover:scale-110"
           aria-label="Open Finance Assistant"
         >
           <FaRobot size={24} />
@@ -111,7 +111,7 @@ const FinanceChatbot = ({ account }) => {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-5 right-5 w-[90%] sm:w-96 max-h-[80vh] bg-white rounded-3xl shadow-2xl border border-blue-100 flex flex-col overflow-hidden">
+        <div className="fixed bottom-5 right-5 w-[90%] sm:w-96 max-h-[80vh] bg-white rounded-3xl shadow-2xl border border-blue-100 z-[100] flex flex-col overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-to-r from-[#005AA7] to-[#2E8BC0] text-white p-4 flex justify-between items-center rounded-t-3xl">
             <div className="flex items-center space-x-2">
