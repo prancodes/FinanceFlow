@@ -18,6 +18,12 @@ FinanceFlow offers an intuitive and user-friendly dashboard that simplifies the 
 - **User-Centric Dashboard:**  
   Easily manage accounts and transactions through a dynamic dashboard built with modern web technologies.
 
+- **Chatbot Integration:**  
+  Get real-time financial support through an AI-powered chatbot, enabling users to ask questions, request summaries, or receive insights on demand directly from the app interface.
+
+- **Personal Insights via Cron Jobs:**  
+  Monthly insights are auto-generated using Google Gemini and delivered via email, providing users with personalized summaries, spending breakdowns, and actionable advice to improve their financial habits.
+
 ## Technology Stack
 
 - **Frontend:**  
@@ -30,10 +36,11 @@ FinanceFlow offers an intuitive and user-friendly dashboard that simplifies the 
   Optimized with dynamic meta tags, structured data, automated sitemap generation, and responsive design techniques to ensure high visibility on search engines.
 
 ## FinanaceFlow Team
-- [Pranjal Singh](https://github.com/prancodes)
-- [Om Singh](https://github.com/24-droid)
-- [Pushkar Singh](https://github.com/BackpropX)
-- [Vikas Vishwakarma](https://github.com/VikasVk03)
+- [Pranjal Singh](https://github.com/prancodes)  
+- [Om Singh](https://github.com/24-droid)  
+- [Pushkar Singh](https://github.com/BackpropX)  
+- [Vikas Vishwakarma](https://github.com/VikasVk03)  
+
 ---
 
 FinanceFlow is committed to delivering a secure and efficient platform that empowers users to take control of their financial future through intelligent data insights and streamlined management tools.
