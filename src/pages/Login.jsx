@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, redirect } from 'react-router-dom';
 import ErrorMessage from '../components/ErrorMessage';
 import { Helmet } from "react-helmet";
 
@@ -38,6 +38,38 @@ const Login = () => {
       setIsLoading(false);
     }
   };
+  const handleGuestLogin=async()=>{
+    setIsLoading(true);
+    try {
+      const response= await fetch('/api/guest', {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+        },
+        body:JSON.stringify({
+          isGuest:{
+            isGuests:true,
+          },
+        }),
+        credentials:'include',
+      });
+      if(response.ok)
+        {
+          navigate('/dashboard');
+        }
+        else{
+          const data=await response.json();
+          setError(data.error || 'Guest login failed. Please try again.');
+        }
+    } 
+    catch (error) {
+      setError('An error occurred. Please try again later.');
+    }
+    finally{
+      setIsLoading(false);
+    }
+    
+  }
 
   return (
     <div className="flex items-center justify-center lg:my-10 bg-gray-100 lg:px-4">
@@ -103,6 +135,14 @@ const Login = () => {
             )}
           </button>
         </form>
+
+        <button
+          onClick={handleGuestLogin}
+          className="w-full mt-3 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+          disabled={isLoading}
+        >
+          {isLoading ? "Logging in..." : "Continue as Guest"}
+        </button>
 
         <p className="text-center text-sm text-gray-600 mt-4">
           Don't have an account?{' '}

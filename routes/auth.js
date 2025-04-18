@@ -122,10 +122,44 @@ router.post("/login", async (req, res, next) => {
     next(error);
   }
 });
+router.post("/guest",async(req,res,next)=>{
+  try {
+    const{isGuests}=req.body.isGuest;
+    console.log(isGuests);
+    let name="Guest";
+    let email="guest@gmail.com";
+    let password="1234"
+
+    const guestUser = await User.create({
+      name,
+      email,
+      password,
+      isVerified: true,
+    });
+    console.log(guestUser);
+    req.session.userId = guestUser._id;
+    guestUser.save();
+
+    if(!isGuests){
+      return res.status(400).json({error:"Guest access denied"});
+    }
+    if(isGuests)
+      {
+        req.session.isGuest=true;
+        res.redirect("/dashboard");
+      }
+  } catch (error) {
+    next(error);
+  }
+})
 
 // Logout route
-router.post("/logout", (req, res, next) => {
+router.post("/logout", async(req, res, next) => {
   res.clearCookie("token");
+  if(req.session.isGuest){
+    console.log(req.session.userId);
+    await User.deleteOne({ _id: req.session.userId });
+  }
   req.session.destroy(err => {
     if (err) {
       return next(new CustomError(500, "Logout error. Please try again later."));
@@ -138,7 +172,11 @@ router.post("/logout", (req, res, next) => {
 router.get("/checkAuth", (req, res) => {
   if (req.session.userId) {
     res.status(200).json({ authenticated: true });
-  } else {
+  }
+  else if(req.session.isGuest){
+    res.status(200).json({ authenticated: true });
+  }
+   else {
     res.status(401).json({ authenticated: false });
   }
 });

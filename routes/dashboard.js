@@ -20,10 +20,11 @@ router.get("/addAccount", isLoggedIn, (req, res) => {
 router.get("/", isLoggedIn, async (req, res, next) => {
   try {
     const userId = req.session.userId;
-    if (!userId) throw new CustomError(401, "User not authenticated");
+    const isGuest= req.session.isGuest;
+    if (!userId && !isGuest) throw new CustomError(401, "User not authenticated");
 
     const user = await User.findById(userId).populate("accounts");
-    if (!user) throw new CustomError(404, "User not found");
+    if (!user && !isGuest) throw new CustomError(404, "User not found");
 
     res.json({
       name: user.name,
@@ -41,7 +42,8 @@ router.get("/", isLoggedIn, async (req, res, next) => {
 router.get("/:accountId", isLoggedIn, async (req, res, next) => {
   try {
     const userId = req.session.userId;
-    if (!userId) throw new CustomError(401, "User not authenticated");
+    const isGuest= req.session.isGuest;
+    if (!userId && !isGuest) throw new CustomError(401, "User not authenticated");
 
     const { accountId } = req.params;
     const account = await Account.findOne({
@@ -69,7 +71,8 @@ router.get("/:accountId", isLoggedIn, async (req, res, next) => {
 router.post("/addAccount", isLoggedIn, async (req, res, next) => {
   try {
     const userId = req.session.userId;
-    if (!userId) throw new CustomError(401, "User not authenticated.");
+    const isGuest= req.session.isGuest;
+    if (!userId && !isGuest) throw new CustomError(401, "User not authenticated.");
 
     const { name, type, balance } = req.body.account;
     if (!["Current", "Savings"].includes(type))
