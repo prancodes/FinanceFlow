@@ -135,10 +135,12 @@ router.post("/guest",async(req,res,next)=>{
       email,
       password,
       isVerified: true,
+      expiresAt: new Date(Date.now() + 7 * 60 * 1000), 
     });
     console.log(guestUser);
     req.session.userId = guestUser._id;
     guestUser.save();
+    req.session.cookie.maxAge=7*60*1000;
 
     if(!isGuests){
       return res.status(400).json({error:"Guest access denied"});

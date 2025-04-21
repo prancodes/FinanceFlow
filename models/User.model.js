@@ -19,6 +19,11 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false, // Defaults to false, updated to true after OTP verification
     },
+    expiresAt:{
+      type: Date,
+      default: undefined,
+      index: { expires: 0 }, // Automatically delete the document after expiresAt value is reached
+    },
     otp: String,
     transactions: [
       {
