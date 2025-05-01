@@ -5,7 +5,7 @@ import { Verification_Email_Template, Welcome_Email_Template } from "./EmailTemp
 export const sendOtp = async (email, otp) => {
     try {
         const response = await transporter.sendMail({
-            from: `"MyExpense" <${process.env.EMAIL_USER}>`, // sender address
+            from: `"FinanceFlow" <${process.env.EMAIL_USER}>`, // sender address
             to: email, // list of receivers
             subject: "Verify your Email", // Subject line
             text: "Verify your Email", // plain text body
@@ -21,10 +21,10 @@ export const sendOtp = async (email, otp) => {
 export const WelcomeEmail = async (email, name  ) => {
     try {
         const response = await transporter.sendMail({
-            from: `"MyExpense" <${process.env.EMAIL_USER}>`, // sender address
+            from: `"FinanceFlow" <${process.env.EMAIL_USER}>`, // sender address
             to: email, // list of receivers
-            subject: "Welcome to MyExpense", // Subject line
-            text: "Welcome to MyExpense", // plain text body
+            subject: "Welcome to FinanceFlow", // Subject line
+            text: "Welcome to FinanceFlow", // plain text body
             html: Welcome_Email_Template.replace("{name}",name), // html body
         });
         console.log("Email sent successfully",response.accepted);

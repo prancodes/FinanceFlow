@@ -71,7 +71,7 @@ const CreateAccForm = () => {
   return (
     <div className="flex items-center justify-center lg:mt-8 bg-gray-100 lg:px-4">
       <Helmet>
-        <title>MyExpense - Create Your Account</title>
+        <title>FinanceFlow - Create Your Account</title>
       </Helmet>
       <div className="w-full max-w-sm sm:max-w-md bg-white p-6 rounded-lg shadow-md">
         <form onSubmit={handleSubmit}>

@@ -7,7 +7,7 @@ const ErrorMessage = ({ message, onClose }) => {
   return (
     <div className="relative bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
       <Helmet>
-        <title>MyExpense - Page Not Found</title>
+        <title>FinanceFlow - Page Not Found</title>
       </Helmet>
       <span className="block sm:inline">{message}</span>
       <button

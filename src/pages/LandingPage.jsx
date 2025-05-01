@@ -94,7 +94,7 @@ const LandingPage = () => {
           <ReviewCard
             name="Karan Singh"
             role="Financial Advisor"
-            text="I recommend MyExpense to all my clients. The multi-currency support and detailed analytics make it perfect for international investors."
+            text="I recommend FinanceFlow to all my clients. The multi-currency support and detailed analytics make it perfect for international investors."
           />
         </div>
       </div>
