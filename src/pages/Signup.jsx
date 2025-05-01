@@ -83,7 +83,7 @@ const Signup = () => {
     <div className="flex items-center justify-center lg:my-8 bg-gray-100 lg:px-4">
       <div className="w-full max-w-sm sm:max-w-md bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-center text-xl sm:text-2xl font-semibold text-gray-700 mb-6">
-          FinanceFlow
+        MyExpense
         </h2>
         <h3 className="text-center text-lg sm:text-xl font-medium text-gray-600 mb-4">
           {showOtp ? "Verify OTP" : "Create New Account"}

@@ -138,14 +138,14 @@ const sendMonthlyAlerts=async()=>{
         const {initialBalance,currentBalance,expensesByCategory}=await fetchUserData(user._id, startOfMonth,endOfMonth);
         const insights=await generateInsights(expensesByCategory, parseFloat(currentBalance.toString()));
         const cta = `
-        <strong>Keep using FinanceFlow to:</strong>
+        <strong>Keep using MyExpense to:</strong>
         <ul>
           <li>Track your expenses effortlessly.</li>
           <li>Receive personalized insights to improve your financial health.</li>
           <li>Set and achieve your financial goals with ease.</li>
           <li>Stay on top of your finances with monthly reports like this one.</li>
         </ul>
-        Thank you for trusting FinanceFlow to help you manage your money better!`;
+        Thank you for trusting MyExpense to help you manage your money better!`;
         const emailHtml=compileTemplate('./templates/email-template.hbs',{
           initialBalance,
           currentBalance,

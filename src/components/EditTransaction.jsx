@@ -98,7 +98,7 @@ const EditTransaction = () => {
   return (
     <div>
       <Helmet>
-        <title>FinanceFlow - Edit Transaction</title>
+        <title>MyExpense - Edit Transaction</title>
       </Helmet>
       <form
         onSubmit={handleSubmit}

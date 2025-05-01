@@ -70,7 +70,7 @@ export const Verification_Email_Template = `
               <p>If you did not create an account, no further action is required. If you have any questions, feel free to contact our support team.</p>
           </div>
           <div class="footer">
-              <p>&copy; ${new Date().getFullYear()} FinanceFlow. All rights reserved.</p>
+              <p>&copy; ${new Date().getFullYear()} MyExpense. All rights reserved.</p>
           </div>
       </div>
   </body>
@@ -86,7 +86,7 @@ export const Welcome_Email_Template = `
   <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Welcome to FinanceFlow</title>
+      <title>Welcome to MyExpense</title>
       <style>
           body {
               font-family: Arial, sans-serif;
@@ -151,7 +151,7 @@ export const Welcome_Email_Template = `
   </head>
   <body>
       <div class="container">
-          <div class="header">Welcome to FinanceFlow! We're excited to have you on board. 🎉</div>
+          <div class="header">Welcome to MyExpense! We're excited to have you on board. 🎉</div>
           <div class="content">
               <p class="welcome-message">Hello {name},</p>
               <p>We’re thrilled to have you join us! Your Account was successfully created, and we’re committed to providing you with the best experience possible.</p>
@@ -165,12 +165,12 @@ export const Welcome_Email_Template = `
               <p>If you have any questions or need assistance, feel free to reach out to our support team.
 
                 Happy budgeting!
-                The FinanceFlow Team
-                financeflow341@gmail.com
+                The MyExpense Team
+                myexpense.ly@gmail.com
               </p>
           </div>
           <div class="footer">
-              <p>&copy; ${new Date().getFullYear()} FinanceFlow. All rights reserved.</p>
+              <p>&copy; ${new Date().getFullYear()} MyExpense. All rights reserved.</p>
           </div>
       </div>
   </body>

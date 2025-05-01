@@ -129,7 +129,7 @@ const AccountDetail = () => {
   return (
     <div className="min-h-screen bg-gray-100 lg:p-6 relative">
       <Helmet>
-        <title>FinanceFlow - Account Details</title>
+        <title>MyExpense - Account Details</title>
       </Helmet>
       <div className="max-w-4xl mx-auto bg-white lg:p-8 p-6 rounded-lg shadow-lg">
         <ErrorMessage message={error} onClose={() => setError('')} />

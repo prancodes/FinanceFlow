@@ -74,11 +74,11 @@ const Login = () => {
   return (
     <div className="flex items-center justify-center lg:my-10 bg-gray-100 lg:px-4">
       <Helmet>
-        <title>FinanceFlow - Login to Your Account</title>
+        <title>MyExpense - Login to Your Account</title>
       </Helmet>
       <div className="w-full max-w-sm sm:max-w-md bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-center text-xl sm:text-2xl font-semibold text-gray-700 mb-6">
-          FinanceFlow
+        MyExpense
         </h2>
         <h3 className="text-center text-lg sm:text-xl font-medium text-gray-600 mb-4">
           Login

@@ -6,7 +6,7 @@ const Home = () => {
     return (
         <>
             <Helmet>
-                <title>FinanceFlow - Manage Your Finances Efficiently</title>
+                <title>MyExpense - Manage Your Finances Efficiently</title>
             </Helmet>
             <LandingPage />
         </>

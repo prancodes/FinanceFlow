@@ -92,7 +92,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-100 lg:p-6">
       <Helmet>
-        <title>FinanceFlow Dashboard - Your Financial Overview</title>
+        <title>MyExpense Dashboard - Your Financial Overview</title>
       </Helmet>
       <div className="max-w-4xl mx-auto bg-white lg:p-8 p-6 rounded-lg shadow-lg">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">

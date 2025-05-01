@@ -148,7 +148,7 @@ const Analytics = () => {
   return (
     <div className="p-6 bg-white rounded-lg shadow-md lg:mt-6 space-y-8">
       <Helmet>
-        <title>FinanceFlow - Analytics & Insights</title>
+        <title>MyExpense - Analytics & Insights</title>
       </Helmet>
       <ErrorMessage message={error} onClose={() => setError('')} />
       <h1 className="text-3xl font-bold text-gray-800">Financial Analytics</h1>
