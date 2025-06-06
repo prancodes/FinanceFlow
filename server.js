@@ -25,7 +25,7 @@ main().catch(console.error);
 
 // Constants
 const isProduction = process.env.NODE_ENV === "production";
-const port = process.env.PORT || 5173;
+const port = process.env.PORT || 3000;
 const base = process.env.BASE || "/";
 
 // Create Express app
@@ -138,12 +138,8 @@ app.use("*all", async (req, res) => {
 // Use the custom error handling middleware
 app.use(errorHandler);
 
-// Start HTTP server
-// ─── ONLY START LISTEN & SCHEDULER WHEN NOT RUNNING ON VERCEL ────────────────────
-// If process.env.VERCEL is set to "1", we are *inside* a Vercel Serverless Function.
-// In that case, we EXPORT `app` instead of calling `app.listen(...)` here.
-if (!process.env.VERCEL) {
-  // Start HTTP server
+// Check NODE_ENV instead of process.env.VERCEL:
+if (process.env.NODE_ENV !== "production") {
   app.listen(port, () => {
     console.log(`Server started at http://localhost:${port}`);
     startScheduler();
