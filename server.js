@@ -139,7 +139,7 @@ app.use("*all", async (req, res) => {
 app.use(errorHandler);
 
 // Check NODE_ENV instead of process.env.VERCEL:
-if (process.env.NODE_ENV !== "production") {
+if (!process.env.VERCEL) {
   app.listen(port, () => {
     console.log(`Server started at http://localhost:${port}`);
     startScheduler();
