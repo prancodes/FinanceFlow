@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     sitemap({
-      hostname: 'https://financeflow-va6m.onrender.com',
+      hostname: 'https://financeflow24.vercel.app',
     })
   ],
 });
