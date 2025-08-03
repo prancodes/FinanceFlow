@@ -24,12 +24,16 @@ router.get("/login", (req, res) => {
 
 // Signup route
 router.post("/signup", async (req, res, next) => {
-  const { name, email, password } = req.body.user;
+  const { name, email, password,whatsappNumber } = req.body.user;
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ error: "Email already exists! Please login." });  
     }
+    if(whatsappNumber&& !/^whatsapp:\+\d{10,15}$/.test(whatsappNumber))
+      {
+        return res.status(400).json({ error: "Invalid WhatsApp number format. Use whatsapp:+91..." });
+      }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -39,6 +43,7 @@ router.post("/signup", async (req, res, next) => {
       email,
       password: hashedPassword,
       otp,
+      whatsappNumber,
     };
 
     // Await sendOtp to catch errors
@@ -57,7 +62,7 @@ router.post("/verify-using-otp", async (req, res, next) => {
       return res.status(400).json({ success: false, message: "Session expired. Please sign up again." });
     }
 
-    const { name, email, password, otp } = req.session.tempUser;
+    const { name, email, password, otp,whatsappNumber } = req.session.tempUser;
 
     // Compare user-provided OTP with stored OTP
     if (code !== otp) {
@@ -68,6 +73,7 @@ router.post("/verify-using-otp", async (req, res, next) => {
       name,
       email,
       password,
+      whatsappNumber,
       isVerified: true,
     });
 

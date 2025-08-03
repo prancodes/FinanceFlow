@@ -7,6 +7,7 @@ const Signup = () => {
     name: "",
     email: "",
     password: "",
+    whatsappNumber:""
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -179,6 +180,24 @@ const Signup = () => {
                 required
                 disabled={isLoading}
               />
+            </div>
+            <div className="mb-4">
+              <label htmlFor="whatsappNumber" className="block text-gray-700">
+                WhatsApp Number (Optional)
+              </label>
+              <input
+                type="text"
+                id="whatsappNumber"
+                name="whatsappNumber"
+                placeholder="Ex: whatsapp:+919876543210"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                value={formData.whatsappNumber}
+                onChange={handleChange}
+                disabled={isLoading}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Required for tracking expenses via WhatsApp.
+              </p>
             </div>
 
             <button
