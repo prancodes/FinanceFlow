@@ -8,6 +8,7 @@ import {
   FaClipboardList,
   FaMoneyBillWave,
   FaCheckCircle,
+  FaWhatsapp,
 } from "react-icons/fa";
 
 const LandingPage = () => {
@@ -54,28 +55,44 @@ const LandingPage = () => {
 
       {/* Working Section */}
       <div className="px-4 py-8 md:p-8 bg-gray-100">
-        <h2 className="text-2xl font-semibold text-center mb-6">
-          How It Works
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <FeatureCard
-            icon={FaClipboardList}
-            title="Step 1: Add Transactions"
-            desc="Easily log your expenses and incomes with our user-friendly, intuitive interface designed for efficiency."
-          />
-          <FeatureCard
-            icon={FaMoneyBillWave}
-            title="Step 2: Get Insights"
-            desc="Our AI-driven analytics thoroughly process your data, providing actionable insights and comprehensive, detailed reports."
-          />
-          <FeatureCard
-            icon={FaCheckCircle}
-            title="Step 3: Optimize Finances"
-            desc="Get smart recommendations from your spending data to optimize budgets and boost financial health."
-          />
-        </div>
-
-      </div>
+  <h2 className="text-2xl font-semibold text-center mb-6">How It Works</h2>
+  {/* 👇 2. Update the grid classes here */}
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <FeatureCard
+      icon={FaClipboardList}
+      title="Step 1: Add Transactions"
+      desc="Easily log your expenses and incomes with our user-friendly, intuitive interface designed for efficiency."
+    />
+    <FeatureCard
+      icon={FaMoneyBillWave}
+      title="Step 2: Get Insights"
+      desc="Our AI-driven analytics thoroughly process your data, providing actionable insights and comprehensive, detailed reports."
+    />
+    <FeatureCard
+      icon={FaCheckCircle}
+      title="Step 3: Optimize Finances"
+      desc="Get smart recommendations from your spending data to optimize budgets and boost financial health."
+    />
+   <FeatureCard
+    icon={FaWhatsapp}
+    title="Track via WhatsApp"
+    // 👇 The link is now placed inside the description prop.
+    desc={
+      <>
+      Instantly record expenses on the go by sending a simple message.
+      <a
+        href="https://wa.me/14155238886?text=lessgo!"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block font-semibold text-blue-600 hover:underline mt-2"
+      >
+        Get Started →
+      </a>
+    </>
+  }
+/>
+  </div>
+</div>
 
       {/* Reviews Section */}
       <div className="px-4 py-8 md:p-8 text-center">
