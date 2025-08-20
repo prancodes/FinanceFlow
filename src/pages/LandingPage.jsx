@@ -9,15 +9,17 @@ import {
   FaMoneyBillWave,
   FaCheckCircle,
   FaWhatsapp,
+  FaInfoCircle,
 } from "react-icons/fa";
+import { Tooltip } from "react-tooltip";
 
 const LandingPage = () => {
   return (
     <div className="min-h-screen bg-white flex flex-col md:mt-7">
-      {/* Hero Section */}
+      
       <HeroSection />
 
-      {/* Stats Section */}
+      
       <div className="py-3 md:p-6 bg-blue-50 text-center grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatsCard label="Active Users" value="100+" />
         <StatsCard
@@ -29,7 +31,7 @@ const LandingPage = () => {
         <StatsCard label="User Rating" value="4.9/5" />
       </div>
 
-      {/* Features Section */}
+      
       <div className="px-4 py-8 md:p-8">
         <h2 className="text-2xl font-semibold text-center mb-6">
           Everything you need to manage your finances
@@ -53,10 +55,10 @@ const LandingPage = () => {
         </div>
       </div>
 
-      {/* Working Section */}
+      
       <div className="px-4 py-8 md:p-8 bg-gray-100">
   <h2 className="text-2xl font-semibold text-center mb-6">How It Works</h2>
-  {/* 👇 2. Update the grid classes here */}
+  
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
     <FeatureCard
       icon={FaClipboardList}
@@ -74,27 +76,42 @@ const LandingPage = () => {
       desc="Get smart recommendations from your spending data to optimize budgets and boost financial health."
     />
    <FeatureCard
-    icon={FaWhatsapp}
-    title="Track via WhatsApp"
-    // 👇 The link is now placed inside the description prop.
-    desc={
-      <>
+  icon={FaWhatsapp}
+  title="Track via WhatsApp"
+  desc={
+    <>
       Instantly record expenses on the go by sending a simple message.
-      <a
-        href="https://wa.me/14155238886?text=lessgo!"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block font-semibold text-blue-600 hover:underline mt-2"
-      >
-        Get Started →
-      </a>
+      
+      <div className="flex items-center mt-2">
+        {/* This link correctly sends "lessgo!" */}
+        <a
+          href="https://wa.me/14155238886?text=lessgo!"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold text-blue-600 hover:underline"
+        >
+          Get Started →
+        </a>
+        
+        {/* 👇 2. Add the info icon with tooltip attributes */}
+        <span
+          data-tooltip-id="whatsapp-instructions"
+          data-tooltip-content="First time? Send 'join sad-gravity' to our WhatsApp number first, then click Get Started."
+          className="ml-2 text-gray-400 cursor-pointer"
+        >
+          <FaInfoCircle />
+        </span>
+      </div>
     </>
   }
 />
+
+{/* 👇 3. Add the main Tooltip component to render the tooltips */}
+<Tooltip id="whatsapp-instructions" className="max-w-xs" />
   </div>
 </div>
 
-      {/* Reviews Section */}
+      
       <div className="px-4 py-8 md:p-8 text-center">
         <h2 className="text-2xl font-semibold mb-6">What Our Users Say</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

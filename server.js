@@ -36,9 +36,8 @@ const base = process.env.BASE || "/";
 const accountSid=process.env.TWILIO_ACCOUNT_SID;
 const authToken=process.env.TWILIO_AUTH_TOKEN;
 
-
 const app = express();
-app.post('/api/twilio/whatsapp', twilio.webhook(), async (req, res) => {
+app.post('/api/twilio/whatsapp', express.urlencoded({ extended: false }), async (req, res) => {
   const fromNumber = req.body.From;
   const incomingMsg = req.body.Body.trim();
   const twiml = new twilio.twiml.MessagingResponse();
