@@ -14,7 +14,7 @@ router.post('/scan-receipt', isLoggedIn, async (req, res, next) => {
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 
     const prompt = `Extract the following information from this receipt:
     - Total Amount

@@ -10,7 +10,7 @@ import cron from "node-cron";
 import nodemailer from "nodemailer"
 
 const genAI=new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model=genAI.getGenerativeModel({model:"gemini-1.5-flash"});
+const model=genAI.getGenerativeModel({model:"gemini-2.5-flash-lite"});
 //Here we are getting current date and month and based on that we are tracking the first and the last date of the month
 const getCurrentMonthDate=()=>{
     const now=new Date();
