@@ -30,7 +30,7 @@ router.post("/signup", async (req, res, next) => {
     if (existingUser) {
       return res.status(400).json({ error: "Email already exists! Please login." });  
     }
-    if(whatsappNumber&& !/^whatsapp:\+\d{10,15}$/.test(whatsappNumber))
+    if(whatsappNumber && whatsappNumber.trim() !== "" && !/^whatsapp:\+\d{10,15}$/.test(whatsappNumber))
       {
         return res.status(400).json({ error: "Invalid WhatsApp number format. Use whatsapp:+91..." });
       }
@@ -43,10 +43,9 @@ router.post("/signup", async (req, res, next) => {
       email,
       password: hashedPassword,
       otp,
-      whatsappNumber,
+      whatsappNumber: whatsappNumber && whatsappNumber.trim() !== "" ? whatsappNumber : undefined,
     };
 
-    // Await sendOtp to catch errors
     await sendOtp(email, otp);
     return res.status(200).json({ success: true, message: "OTP sent to email" });
   } catch (error) {
@@ -54,7 +53,6 @@ router.post("/signup", async (req, res, next) => {
   }
 });
 
-// Verify OTP route with proper OTP comparison
 router.post("/verify-using-otp", async (req, res, next) => {
   try {
     const { code } = req.body;
@@ -64,7 +62,6 @@ router.post("/verify-using-otp", async (req, res, next) => {
 
     const { name, email, password, otp,whatsappNumber } = req.session.tempUser;
 
-    // Compare user-provided OTP with stored OTP
     if (code !== otp) {
       throw new CustomError(404, "Invalid OTP. Please try again.");
     }
@@ -73,7 +70,7 @@ router.post("/verify-using-otp", async (req, res, next) => {
       name,
       email,
       password,
-      whatsappNumber,
+      whatsappNumber: whatsappNumber || undefined,
       isVerified: true,
     });
 
@@ -84,7 +81,6 @@ router.post("/verify-using-otp", async (req, res, next) => {
     req.session.userId = createdUser._id;
     req.session.tempUser = null;
 
-    // Optionally clear the otp field if stored
     createdUser.otp = undefined;
     await createdUser.save();
 
