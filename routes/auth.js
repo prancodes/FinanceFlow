@@ -7,7 +7,25 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import CustomError from '../utils/CustomError.js';
 import { User } from '../models/User.model.js';
+import { Account } from '../models/Account.model.js';
+import { Transaction } from '../models/Transaction.model.js';
+import { Budget } from '../models/Budget.model.js';
 import { sendOtp, WelcomeEmail } from '../middleware/Email.js';
+
+const deleteGuestData = async (userId) => {
+  try {
+    const accounts = await Account.find({ user: userId });
+    const accountIds = accounts.map(acc => acc._id);
+
+    // Delete transactions, accounts, and budgets cascade
+    await Transaction.deleteMany({ account: { $in: accountIds } });
+    await Account.deleteMany({ user: userId });
+    await Budget.deleteMany({ user: userId });
+    console.log(`Successfully deleted guest account data for user ${userId}`);
+  } catch (error) {
+    console.error(`Failed to delete guest account data: ${error.message}`);
+  }
+};
 
 const router = express.Router();
 const jwtSecret = process.env.JWT_SECRET;
@@ -30,10 +48,20 @@ router.post("/signup", async (req, res, next) => {
     if (existingUser) {
       return res.status(400).json({ error: "Email already exists! Please login." });  
     }
-    if(whatsappNumber && whatsappNumber.trim() !== "" && !/^whatsapp:\+\d{10,15}$/.test(whatsappNumber))
-      {
-        return res.status(400).json({ error: "Invalid WhatsApp number format. Use whatsapp:+91..." });
+    let normalizedWhatsapp = whatsappNumber;
+    if (normalizedWhatsapp && normalizedWhatsapp.trim() !== "") {
+      normalizedWhatsapp = normalizedWhatsapp.trim().replace(/^whatsapp:/i, "").replace(/^\+/, "");
+      normalizedWhatsapp = `whatsapp:+${normalizedWhatsapp}`;
+      
+      if (!/^whatsapp:\+\d{10,15}$/.test(normalizedWhatsapp)) {
+        return res.status(400).json({ error: "Invalid WhatsApp number. Please check country code and digits." });
       }
+
+      const existingWhatsappUser = await User.findOne({ whatsappNumber: normalizedWhatsapp });
+      if (existingWhatsappUser) {
+        return res.status(400).json({ error: "WhatsApp number is already registered to another account." });
+      }
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -43,7 +71,7 @@ router.post("/signup", async (req, res, next) => {
       email,
       password: hashedPassword,
       otp,
-      whatsappNumber: whatsappNumber && whatsappNumber.trim() !== "" ? whatsappNumber : undefined,
+      whatsappNumber: normalizedWhatsapp && normalizedWhatsapp.trim() !== "" ? normalizedWhatsapp : undefined,
     };
 
     await sendOtp(email, otp);
@@ -91,6 +119,7 @@ router.post("/verify-using-otp", async (req, res, next) => {
         return next(new CustomError(500, "JWT error. Please try again later."));
       }
       res.cookie("token", token, { sameSite: "lax", secure: true });
+      res.cookie("isLoggedIn", "true", { sameSite: "lax", secure: true });
       return res.status(200).json({ success: true, message: "Email Verified Successfully" });
     });
   } catch (error) {
@@ -115,6 +144,7 @@ router.post("/login", async (req, res, next) => {
           return next(new CustomError(500, "JWT error. Please try again later."));
         }
         res.cookie("token", token, { sameSite: "lax", secure: true });
+        res.cookie("isLoggedIn", "true", { sameSite: "lax", secure: true });
         res.redirect("/dashboard");
       });
     } else {
@@ -124,34 +154,32 @@ router.post("/login", async (req, res, next) => {
     next(error);
   }
 });
-router.post("/guest",async(req,res,next)=>{
+router.post("/guest", async (req, res, next) => {
   try {
-    const{isGuests}=req.body.isGuest;
-    console.log(isGuests);
-    let name="Guest";
-    let email="guest@gmail.com";
-    let password="1234"
+    const isGuests = req.body.isGuest?.isGuests;
+
+    if (!isGuests) {
+      return res.status(400).json({ error: "Guest access denied" });
+    }
+
+    const name = "Guest";
+    const email = `guest_${Date.now()}_${Math.floor(Math.random() * 1000)}@financeflow.com`;
+    const hashedPassword = await bcrypt.hash("guest1234", 10);
 
     const guestUser = await User.create({
       name,
       email,
-      password,
+      password: hashedPassword,
       isVerified: true,
-      expiresAt: new Date(Date.now() + 7 * 60 * 1000), 
+      expiresAt: new Date(Date.now() + 7 * 60 * 1000),
     });
-    console.log(guestUser);
-    req.session.userId = guestUser._id;
-    guestUser.save();
-    req.session.cookie.maxAge=7*60*1000;
 
-    if(!isGuests){
-      return res.status(400).json({error:"Guest access denied"});
-    }
-    if(isGuests)
-      {
-        req.session.isGuest=true;
-        res.redirect("/dashboard");
-      }
+    req.session.userId = guestUser._id;
+    req.session.isGuest = true;
+    req.session.cookie.maxAge = 7 * 60 * 1000;
+    res.cookie("isLoggedIn", "true", { sameSite: "lax", secure: true, maxAge: 7 * 60 * 1000 });
+
+    res.redirect("/dashboard");
   } catch (error) {
     next(error);
   }
@@ -160,9 +188,12 @@ router.post("/guest",async(req,res,next)=>{
 // Logout route
 router.post("/logout", async(req, res, next) => {
   res.clearCookie("token");
+  res.clearCookie("isLoggedIn");
   if(req.session.isGuest){
-    console.log(req.session.userId);
-    await User.deleteOne({ _id: req.session.userId });
+    const guestId = req.session.userId;
+    console.log(`Logging out guest user: ${guestId}`);
+    await deleteGuestData(guestId);
+    await User.deleteOne({ _id: guestId });
   }
   req.session.destroy(err => {
     if (err) {

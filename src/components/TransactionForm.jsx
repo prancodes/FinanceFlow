@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { FaUpload } from 'react-icons/fa';
 import ErrorMessage from '../components/ErrorMessage';
 import FormSkeleton from '../skeletons/FormSkeleton';
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 
 const TransactionForm = () => {
   const { accountId } = useParams();
@@ -140,6 +140,7 @@ const TransactionForm = () => {
     <div>
       <Helmet>
         <title>FinanceFlow - Add Transaction</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <form onSubmit={handleSubmit} className="max-w-2xl mx-auto lg:mt-8 mt-3 p-6 bg-white rounded-xl">
         <h2 className="text-4xl font-bold text-blue-600 mb-4">Add Transaction</h2>
