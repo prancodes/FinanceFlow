@@ -3,7 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { FaEdit, FaTrash, FaLongArrowAltLeft } from 'react-icons/fa';
 import ErrorMessage from '../components/ErrorMessage';
 import ListSkeleton from '../skeletons/ListSkeleton';
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 import FinanceChatbot from '../components/FinanceChatbot';
 
 // Cache outside component
@@ -101,8 +101,7 @@ const AccountDetail = () => {
           if (transactionType === "Expense") {
             updatedBalance += transactionAmount;
           } else if (transactionType === "Income") {
-            updatedInitialBalance -= transactionAmount;
-            updatedBalance -= (transactionAmount * 2);
+            updatedBalance -= transactionAmount;
           }
 
           return {
@@ -130,6 +129,7 @@ const AccountDetail = () => {
     <div className="min-h-screen bg-gray-100 lg:p-6 relative">
       <Helmet>
         <title>FinanceFlow - Account Details</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <div className="max-w-4xl mx-auto bg-white lg:p-8 p-6 rounded-lg shadow-lg">
         <ErrorMessage message={error} onClose={() => setError('')} />
@@ -151,15 +151,25 @@ const AccountDetail = () => {
         <p className="text-lg text-gray-700 mb-4">
           <strong>Initial Balance:</strong> ₹{Number(account.initialBalance).toFixed(2)}
         </p>
-        {Number(account.balance).toFixed(2) < 0 ? (
-          <p className="text-lg text-red-700 mb-4">
-            <strong>Balance:</strong> ₹{Number(account.balance).toFixed(2)}
-          </p>
-        ) : (
-          <p className="text-lg text-green-700 mb-4">
-            <strong>Balance:</strong> ₹{Number(account.balance).toFixed(2)}
-          </p>
-        )}
+        {(() => {
+          const balanceNum = Number(account.balance);
+          const initialNum = Number(account.initialBalance);
+          const diff = balanceNum - initialNum;
+          const diffStr = diff >= 0 ? `+₹${diff.toFixed(2)}` : `-₹${Math.abs(diff).toFixed(2)}`;
+          const diffColor = diff >= 0 ? 'text-green-600 font-bold' : 'text-red-600 font-bold';
+          
+          return (
+            <div className="text-lg text-gray-700 mb-4 flex items-center flex-wrap gap-2">
+              <strong>Balance:</strong>
+              <span className={balanceNum < 0 ? "text-red-700 font-bold" : "text-green-700 font-bold"}>
+                ₹{balanceNum.toFixed(2)}
+              </span>
+              <span className={`text-sm ${diffColor}`}>
+                ({diffStr})
+              </span>
+            </div>
+          );
+        })()}
 
         <div className="mt-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">

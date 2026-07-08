@@ -77,7 +77,7 @@ router.post("/transaction", isLoggedIn, async (req, res, next) => {
     const newTransaction = new Transaction({
       type: data.type,
       amount: data.amount,
-      account: data.account,
+      account: accountId,
       category: data.category,
       date: transactionDate,
       description: data.description,
@@ -95,19 +95,15 @@ router.post("/transaction", isLoggedIn, async (req, res, next) => {
         (parseFloat(account.balance.toString()) - amount).toString()
       );
     } else if (data.type === "Income") {
-      // For income, double the addition to current balance, but add normal amount to initial balance.
       account.balance = mongoose.Types.Decimal128.fromString(
-        (parseFloat(account.balance.toString()) + (amount * 2)).toString()
-      );
-      account.initialBalance = mongoose.Types.Decimal128.fromString(
-        (parseFloat(account.initialBalance.toString()) + amount).toString()
+        (parseFloat(account.balance.toString()) + amount).toString()
       );
     }
 
     await account.save();
 
     await Account.findByIdAndUpdate(
-      data.account,
+      accountId,
       { $push: { transactions: savedTransaction._id } },
       { new: true }
     );
@@ -122,7 +118,7 @@ router.post("/transaction", isLoggedIn, async (req, res, next) => {
     try {
       if (!budget) {
         budget = new Budget({
-          amount: mongoose.Types.Decimal128.fromString(account.balance.toString()),
+          amount: mongoose.Types.Decimal128.fromString(account.initialBalance.toString()),
           currentBalance: mongoose.Types.Decimal128.fromString(account.balance.toString()),
           user: userId,
         });
@@ -133,7 +129,15 @@ router.post("/transaction", isLoggedIn, async (req, res, next) => {
           { new: true }
         );
       } else {
-        budget.currentBalance = account.balance;
+        if (data.type === "Expense") {
+          budget.currentBalance = mongoose.Types.Decimal128.fromString(
+            (parseFloat(budget.currentBalance.toString()) - amount).toString()
+          );
+        } else if (data.type === "Income") {
+          budget.currentBalance = mongoose.Types.Decimal128.fromString(
+            (parseFloat(budget.currentBalance.toString()) + amount).toString()
+          );
+        }
         await budget.save();
       }
     } catch (error) {
@@ -183,11 +187,8 @@ router.put("/transaction/:transactionId", isLoggedIn, async (req, res, next) => 
       throw new CustomError(404, "Account not found");
     }
 
-    // Fetch the budget associated with the user
+    // Fetch the budget associated with the user (optional)
     const budget = await Budget.findOne({ user: account.user });
-    if (!budget) {
-      throw new CustomError(404, "Budget not found");
-    }
 
     // Revert the old transaction's impact on the account balance and budget
     const oldAmount = parseFloat(oldTransaction.amount.toString());
@@ -195,26 +196,20 @@ router.put("/transaction/:transactionId", isLoggedIn, async (req, res, next) => 
       account.balance = mongoose.Types.Decimal128.fromString(
         (parseFloat(account.balance.toString()) + oldAmount).toString()
       );
-      budget.currentBalance = mongoose.Types.Decimal128.fromString(
-        (parseFloat(budget.currentBalance.toString()) + oldAmount).toString()
-      );
-      budget.amount = mongoose.Types.Decimal128.fromString(
-        (parseFloat(budget.amount.toString()) + oldAmount).toString()
-      );
+      if (budget) {
+        budget.currentBalance = mongoose.Types.Decimal128.fromString(
+          (parseFloat(budget.currentBalance.toString()) + oldAmount).toString()
+        );
+      }
     } else if (oldTransaction.type === "Income") {
-      // Since income was added as double in current balance, revert by subtracting double the old amount
       account.balance = mongoose.Types.Decimal128.fromString(
-        (parseFloat(account.balance.toString()) - (oldAmount * 2)).toString()
+        (parseFloat(account.balance.toString()) - oldAmount).toString()
       );
-      account.initialBalance = mongoose.Types.Decimal128.fromString(
-        (parseFloat(account.initialBalance.toString()) - oldAmount).toString()
-      );
-      budget.currentBalance = mongoose.Types.Decimal128.fromString(
-        (parseFloat(budget.currentBalance.toString()) - (oldAmount * 2)).toString()
-      );
-      budget.amount = mongoose.Types.Decimal128.fromString(
-        (parseFloat(budget.amount.toString()) - (oldAmount * 2)).toString()
-      );
+      if (budget) {
+        budget.currentBalance = mongoose.Types.Decimal128.fromString(
+          (parseFloat(budget.currentBalance.toString()) - oldAmount).toString()
+        );
+      }
     }
 
     // Merge the new date (from the request) with the original time from oldTransaction.date
@@ -275,30 +270,25 @@ router.put("/transaction/:transactionId", isLoggedIn, async (req, res, next) => 
       account.balance = mongoose.Types.Decimal128.fromString(
         (parseFloat(account.balance.toString()) - newAmount).toString()
       );
-      budget.currentBalance = mongoose.Types.Decimal128.fromString(
-        (parseFloat(budget.currentBalance.toString()) - newAmount).toString()
-      );
-      budget.amount = mongoose.Types.Decimal128.fromString(
-        (parseFloat(budget.amount.toString()) - newAmount).toString()
-      );
+      if (budget) {
+        budget.currentBalance = mongoose.Types.Decimal128.fromString(
+          (parseFloat(budget.currentBalance.toString()) - newAmount).toString()
+        );
+      }
     } else if (type === "Income") {
       account.balance = mongoose.Types.Decimal128.fromString(
-        (parseFloat(account.balance.toString()) + (newAmount * 2)).toString()
+        (parseFloat(account.balance.toString()) + newAmount).toString()
       );
-      account.initialBalance = mongoose.Types.Decimal128.fromString(
-        (parseFloat(account.initialBalance.toString()) + newAmount).toString()
-      );
-      budget.currentBalance = mongoose.Types.Decimal128.fromString(
-        (parseFloat(budget.currentBalance.toString()) + (newAmount * 2)).toString()
-      );
-      budget.amount = mongoose.Types.Decimal128.fromString(
-        (parseFloat(budget.amount.toString()) + (newAmount * 2)).toString()
-      );
+      if (budget) {
+        budget.currentBalance = mongoose.Types.Decimal128.fromString(
+          (parseFloat(budget.currentBalance.toString()) + newAmount).toString()
+        );
+      }
     }
 
     // Save the updated account balance and budget
     await account.save();
-    await budget.save();
+    if (budget) await budget.save();
 
     res.redirect(`/dashboard/${accountId}`);
   } catch (err) {
@@ -334,40 +324,34 @@ router.delete("/transaction/:transactionId", isLoggedIn, async (req, res, next) 
     }
 
     const budget = await Budget.findOne({ user: userId }).session(session);
-    if (!budget) {
-      await session.abortTransaction();
-      session.endSession();
-      return next(new CustomError(404, "Budget not found"));
-    }
 
     const amount = parseFloat(transaction.amount.toString());
     if (transaction.type === "Expense") {
       account.balance = mongoose.Types.Decimal128.fromString(
         (parseFloat(account.balance.toString()) + amount).toString()
       );
-      budget.currentBalance = mongoose.Types.Decimal128.fromString(
-        (parseFloat(budget.currentBalance.toString()) + amount).toString()
-      );
-      budget.amount = mongoose.Types.Decimal128.fromString(
-        (parseFloat(budget.amount.toString()) + amount).toString()
-      );
+      if (budget) {
+        budget.currentBalance = mongoose.Types.Decimal128.fromString(
+          (parseFloat(budget.currentBalance.toString()) + amount).toString()
+        );
+      }
     } else if (transaction.type === "Income") {
-      account.initialBalance = mongoose.Types.Decimal128.fromString(
-        (parseFloat(account.initialBalance.toString()) - amount).toString()
-      );
       account.balance = mongoose.Types.Decimal128.fromString(
-        (parseFloat(account.balance.toString()) - (amount * 2)).toString()
+        (parseFloat(account.balance.toString()) - amount).toString()
       );
-      budget.currentBalance = mongoose.Types.Decimal128.fromString(
-        (parseFloat(budget.currentBalance.toString()) - (amount * 2)).toString()
-      );
-      budget.amount = mongoose.Types.Decimal128.fromString(
-        (parseFloat(budget.amount.toString()) - (amount * 2)).toString()
-      );
+      if (budget) {
+        budget.currentBalance = mongoose.Types.Decimal128.fromString(
+          (parseFloat(budget.currentBalance.toString()) - amount).toString()
+        );
+      }
     }
 
     await account.save({ session });
-    await budget.save({ session });
+    if (budget) await budget.save({ session });
+
+    // Pull transaction ID references from parent models to prevent populated null items
+    await Account.findByIdAndUpdate(accountId, { $pull: { transactions: transactionId } }, { session });
+    await User.findByIdAndUpdate(userId, { $pull: { transactions: transactionId } }, { session });
 
     await Transaction.findByIdAndDelete(transactionId).session(session);
 
