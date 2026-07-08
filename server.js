@@ -28,6 +28,18 @@ const base = process.env.BASE || "/";
 const app = express();
 app.set("trust proxy", 1); // Trust first proxy (Vercel)
 
+// Traffic Advice for Chrome prefetch proxy (registered early to bypass static files middleware)
+app.get("/.well-known/traffic-advice", (req, res) => {
+  res.setHeader("Content-Type", "application/trafficadvice+json");
+  res.json([
+    {
+      user_agent: "prefetch-proxy",
+      fraction: 1.0,
+    },
+  ]);
+});
+
+
 
 app.use(express.json({ limit: "5mb" })); 
 app.use(cookieParser());
@@ -37,13 +49,47 @@ app.use(express.static(path.join(process.cwd(), "dist"), {
   immutable: true
 }));
 
+/** @type {import('vite').ViteDevServer | undefined} */
+let vite;
+if (!isProduction) {
+  const { createServer } = await import("vite");
+  vite = await createServer({
+    server: { middlewareMode: true },
+    appType: "custom",
+    base,
+  });
+  app.use(vite.middlewares);
+} else {
+  const compression = (await import("compression")).default;
+  const sirv = (await import("sirv")).default;
+  app.use(compression());
+  app.use(base, sirv("./dist/client", {
+    extensions: [],
+    maxAge: 31536000, // 1 year cache
+    immutable: true
+  }));
+}
+
 const sessionSecret = process.env.SESSION_SECRET;
 
 const store = MongoStore.create({
   mongoUrl: MONGO_URL,
   crypto: { secret: sessionSecret },
   touchAfter: 24 * 3600,
+  stringify: false,
 });
+store.decryptSession = async function (session) {
+  if (this.crypto && session) {
+    const plaintext = await this.cryptoGet(this.options.crypto.secret, session.session).catch((err) => {
+      throw new Error(err);
+    });
+    if (typeof plaintext === "object" && plaintext !== null) {
+      session.session = plaintext;
+    } else {
+      session.session = JSON.parse(plaintext);
+    }
+  }
+};
 store.on("error", (error) => {
   console.error("Error in Mongo Session Store", error);
 });
@@ -51,7 +97,7 @@ const sessionOptions = {
   store,
   secret: sessionSecret,
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   cookie: {
     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -76,27 +122,6 @@ const templateHtml = isProduction
   ? await fs.readFile("./dist/client/index.html", "utf-8")
   : "";
 
-
-/** @type {import('vite').ViteDevServer | undefined} */
-let vite;
-if (!isProduction) {
-  const { createServer } = await import("vite");
-  vite = await createServer({
-    server: { middlewareMode: true },
-    appType: "custom",
-    base,
-  });
-  app.use(vite.middlewares);
-} else {
-  const compression = (await import("compression")).default;
-  const sirv = (await import("sirv")).default;
-  app.use(compression());
-  app.use(base, sirv("./dist/client", {
-    extensions: [],
-    maxAge: 31536000, // 1 year cache
-    immutable: true
-  }));
-}
 
 // API Routes
 app.use("/api", homeRoutes);
