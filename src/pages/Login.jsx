@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, redirect } from 'react-router-dom';
 import ErrorMessage from '../components/ErrorMessage';
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -75,6 +75,12 @@ const Login = () => {
     <div className="flex items-center justify-center lg:my-10 bg-gray-100 lg:px-4">
       <Helmet>
         <title>FinanceFlow - Login to Your Account</title>
+        <meta name="description" content="Sign in to your secure FinanceFlow dashboard. Access your personal budgeting cards, review AI receipt scans, and check transaction logs." />
+        <link rel="canonical" href="https://financeflow24.vercel.app/login" />
+        <meta property="og:title" content="FinanceFlow - Login to Your Account" />
+        <meta property="og:description" content="Sign in to your secure FinanceFlow dashboard. Access your personal budgeting cards, review AI receipt scans, and check transaction logs." />
+        <meta property="og:url" content="https://financeflow24.vercel.app/login" />
+        <meta property="og:image" content="https://financeflow24.vercel.app/og-image.png" />
       </Helmet>
       <div className="w-full max-w-sm sm:max-w-md bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-center text-xl sm:text-2xl font-semibold text-gray-700 mb-6">
@@ -100,6 +106,7 @@ const Login = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={isLoading}
+              autoComplete="username"
             />
           </div>
           <div className="mb-4">
@@ -116,6 +123,7 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={isLoading}
+              autoComplete="current-password"
             />
           </div>
           <button

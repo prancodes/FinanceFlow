@@ -9,6 +9,13 @@ export default defineConfig({
     tailwindcss(),
     sitemap({
       hostname: 'https://financeflow24.vercel.app',
+      dynamicRoutes: [
+        '/',
+        '/login',
+        '/signup',
+        '/privacy',
+        '/terms'
+      ]
     })
   ],
 });

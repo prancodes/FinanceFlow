@@ -17,8 +17,8 @@ router.get("/analytics", isLoggedIn, async (req, res, next) => {
     }
 
     // Define date range for the selected year
-    const startDate = new Date(`${selectedYear}-01-01`);
-    const endDate = new Date(`${selectedYear}-12-31`);
+    const startDate = new Date(`${selectedYear}-01-01T00:00:00.000Z`);
+    const endDate = new Date(`${selectedYear}-12-31T23:59:59.999Z`);
 
     // Fetch account with transactions filtered by year
     const account = await Account.findById(accountId).populate({

@@ -4,7 +4,7 @@ export async function getAccountAnalytics(accountId,year)
 {
     const selectedYear=year?parseInt(year):new Date().getFullYear();
     if(isNaN(selectedYear)){
-        res.status(400).json({message:"Invalid year provided."});
+        throw new CustomError(400, "Invalid year provided.");
     }
     const startDate = new Date(`${selectedYear}-01-01T00:00:00.000Z`);
     const endDate = new Date(`${selectedYear}-12-31T23:59:59.999Z`);
