@@ -5,6 +5,7 @@ if (process.env.NODE_ENV !== "production") {
 import express from 'express';
 import isLoggedIn from '../middleware/isLoggedIn.js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import CustomError from '../utils/CustomError.js';
 
 const router = express.Router();
 const apiKey = process.env.GEMINI_API_KEY;
@@ -14,7 +15,7 @@ router.post('/scan-receipt', isLoggedIn, async (req, res, next) => {
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `Extract the following information from this receipt:
     - Total Amount
@@ -44,7 +45,7 @@ router.post('/scan-receipt', isLoggedIn, async (req, res, next) => {
       },
     ];
 
-    const result = await model.generateContent([prompt, imageParts]);
+    const result = await model.generateContent([prompt, ...imageParts]);
     const response = await result.response;
     const text = await response.text();
 

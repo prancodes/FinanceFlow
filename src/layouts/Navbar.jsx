@@ -11,6 +11,12 @@ const Navbar = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
+      const hasLoginCookie = document.cookie.split(';').some(item => item.trim().startsWith('isLoggedIn='));
+      if (!hasLoginCookie) {
+        setIsLoggedIn(false);
+        setLoading(false);
+        return;
+      }
       try {
         const response = await fetch("/api/checkAuth");
         setIsLoggedIn(response.status === 200);
@@ -44,8 +50,10 @@ const Navbar = () => {
         <Link to="/" className="flex items-center">
           <img
             src="/FinanceFlowLogo.webp"
-            alt="FinanceFlow"
+            alt="FinanceFlow Logo"
             className="h-8 w-auto"
+            width="160"
+            height="32"
           />
         </Link>
 

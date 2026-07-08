@@ -6,11 +6,10 @@ import { User } from "../models/User.model.js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import fs from 'fs';
 import handlebars from 'handlebars';
-import cron from "node-cron";
-import nodemailer from "nodemailer"
+import { transporter } from "../middleware/Email.config.js";
 
 const genAI=new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model=genAI.getGenerativeModel({model:"gemini-2.5-flash-lite"});
+const model=genAI.getGenerativeModel({model:"gemini-2.5-flash"});
 //Here we are getting current date and month and based on that we are tracking the first and the last date of the month
 const getCurrentMonthDate=()=>{
     const now=new Date();
@@ -112,40 +111,33 @@ const compileTemplate=(templatePath,data)=>{
 }
 //This method is used to send the email to the user
 const sendEmail=async(to,subject,html)=>{
-  const transporter=nodemailer.createTransport({
-    service:"gmail",
-    auth:{
-      user:process.env.EMAIL_USER,
-      pass:process.env.EMAIL_PASS,
-    }
-  })
-
-const mailOptions={
-  from:process.env.EMAIL_USER,
-  to,
-  subject,
-  html,
-}
-await transporter.sendMail(mailOptions)
+  const mailOptions={
+    from: `"FinanceFlow" <${process.env.EMAIL_USER}>`,
+    to,
+    subject,
+    html,
+  }
+  await transporter.sendMail(mailOptions)
 }
 //This method finally sends the alerts to the user after fetching all the info from the methods
 const sendMonthlyAlerts=async()=>{
   try {
     const {startOfMonth,endOfMonth}=getCurrentMonthDate();
-    const users= await User.find({});
+    // Skip guest accounts (they have generated @financeflow.com emails)
+    const users = await User.find({ email: { $not: /@financeflow\.com$/ } });
     for(const user of users )
       {
         const {initialBalance,currentBalance,expensesByCategory}=await fetchUserData(user._id, startOfMonth,endOfMonth);
         const insights=await generateInsights(expensesByCategory, parseFloat(currentBalance.toString()));
         const cta = `
-        <strong>Keep using MyExpense to:</strong>
+        <strong>Keep using FinanceFlow to:</strong>
         <ul>
           <li>Track your expenses effortlessly.</li>
           <li>Receive personalized insights to improve your financial health.</li>
           <li>Set and achieve your financial goals with ease.</li>
           <li>Stay on top of your finances with monthly reports like this one.</li>
         </ul>
-        Thank you for trusting MyExpense to help you manage your money better!`;
+        Thank you for trusting FinanceFlow to help you manage your money better!`;
         const emailHtml=compileTemplate('./templates/email-template.hbs',{
           initialBalance,
           currentBalance,

@@ -6,7 +6,6 @@ import { Budget } from "../models/Budget.model.js";
 import { Transaction } from "../models/Transaction.model.js";
 import CustomError from "../utils/CustomError.js";
 import mongoose from "mongoose";
-import session from "express-session";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const router = express.Router();
@@ -24,7 +23,7 @@ router.get("/", isLoggedIn, async (req, res, next) => {
     if (!userId && !isGuest) throw new CustomError(401, "User not authenticated");
 
     const user = await User.findById(userId).populate("accounts");
-    if (!user && !isGuest) throw new CustomError(404, "User not found");
+    if (!user) throw new CustomError(404, "User not found");
 
     res.json({
       name: user.name,
@@ -115,23 +114,29 @@ router.delete("/:accountId", isLoggedIn, async (req, res, next) => {
     if (!user) throw new CustomError(404, "User not found");
 
     const budget = await Budget.findOne({ user: userId }).session(session);
-    if (!budget) throw new CustomError(404, "Budget not found");
 
+    // Get the transaction IDs for this account before deleting them
+    const transactionIds = account.transactions.map((t) => t);
     await Transaction.deleteMany({ account: accountId }).session(session);
 
-    const accountBalance = parseFloat(account.balance.toString());
-    if (accountBalance > 0) {
-      budget.currentBalance = mongoose.Types.Decimal128.fromString(
-        (
-          parseFloat(budget.currentBalance.toString()) - accountBalance
-        ).toString()
-      );
-      budget.amount = mongoose.Types.Decimal128.fromString(
-        (parseFloat(budget.amount.toString()) - accountBalance).toString()
-      );
-    }
+    // Clean up orphaned transaction refs from user.transactions[]
+    await User.findByIdAndUpdate(
+      userId,
+      { $pull: { transactions: { $in: transactionIds } } },
+      { session }
+    );
 
-    await budget.save({ session });
+    if (budget) {
+      const accountBalance = parseFloat(account.balance.toString());
+      if (accountBalance > 0) {
+        budget.currentBalance = mongoose.Types.Decimal128.fromString(
+          (
+            parseFloat(budget.currentBalance.toString()) - accountBalance
+          ).toString()
+        );
+      }
+      await budget.save({ session });
+    }
     user.accounts.pull(accountId);
     await user.save({ session });
     await Account.findByIdAndDelete(accountId).session(session);
@@ -166,6 +171,7 @@ router.post("/:accountId/chat", isLoggedIn, async (req, res, next) => {
 
     const groupedTransactions = {};
     for (const txn of account.transactions) {
+      if (!txn) continue;
       const category = txn.category || "Uncategorized";
       if (!groupedTransactions[category]) groupedTransactions[category] = [];
       groupedTransactions[category].push({
@@ -233,7 +239,7 @@ ${
 `;
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     const result = await model.generateContent(prompt);
     const responseText = await result.response.text();
 

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import ErrorMessage from '../components/ErrorMessage';
 import FormSkeleton from '../skeletons/FormSkeleton';
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 
 const CreateAccForm = () => {
   const [name, setName] = useState('');
@@ -71,7 +71,8 @@ const CreateAccForm = () => {
   return (
     <div className="flex items-center justify-center lg:mt-8 bg-gray-100 lg:px-4">
       <Helmet>
-        <title>FinanceFlow - Create Your Account</title>
+        <title>FinanceFlow - Create Account</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <div className="w-full max-w-sm sm:max-w-md bg-white p-6 rounded-lg shadow-md">
         <form onSubmit={handleSubmit}>
@@ -123,18 +124,25 @@ const CreateAccForm = () => {
             />
           </div>
 
-          <div className="flex justify-center mb-5">
-            <div className="flex items-center h-5">
+          <div className="flex items-start mb-5">
+            <div className="flex items-center h-5 mt-0.5">
               <input
                 id="terms"
                 type="checkbox"
-                className="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-3 focus:ring-blue-300"
+                className="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-3 focus:ring-blue-300 cursor-pointer"
                 required
                 disabled={isSubmitting}
               />
             </div>
-            <label htmlFor="terms" className="ml-2 text-sm font-medium text-gray-900">
-              I'm ready to manage my <span className="text-blue-600 font-semibold">Finances.</span>
+            <label htmlFor="terms" className="ml-2 text-sm font-medium text-gray-900 leading-snug">
+              I'm ready to manage my Finances. I agree to the{" "}
+              <Link to="/terms" className="text-blue-600 hover:underline">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link to="/privacy" className="text-blue-600 hover:underline">
+                Privacy Policy
+              </Link>.
             </label>
           </div>
 

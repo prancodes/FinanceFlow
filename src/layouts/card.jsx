@@ -17,7 +17,7 @@ export function FeatureCard({ icon: Icon, title, desc }) {
       <CardContent className="flex flex-col items-start gap-4">
         <Icon className="text-blue-700 text-3xl" />
         <h3 className="text-lg font-semibold">{title}</h3>
-        <p className="text-gray-600">{desc}</p>
+        <div className="text-gray-600">{desc}</div>
       </CardContent>
     </Card>
   );
@@ -28,7 +28,7 @@ export function ReviewCard({ name, role, text }) {
   return (
     <Card className="p-6 shadow-md flex flex-col justify-between min-h-[200px]">
       <CardContent className="text-left flex flex-col justify-between h-full">
-        <p className="text-gray-600 flex-grow">{text}</p>
+        <div className="text-gray-600 flex-grow">{text}</div>
         <div className="mt-6">
           <h3 className="text-lg font-semibold">{name}</h3>
           <p className="text-gray-500 text-sm">{role}</p>
