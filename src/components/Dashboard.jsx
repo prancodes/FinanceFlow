@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaArrowRight, FaTrash } from 'react-icons/fa';
 import ListSkeleton from '../skeletons/ListSkeleton';
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 
 // Cache outside component to persist between mounts
 let dataPromise = null;
@@ -93,6 +93,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gray-100 lg:p-6">
       <Helmet>
         <title>FinanceFlow Dashboard - Your Financial Overview</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <div className="max-w-4xl mx-auto bg-white lg:p-8 p-6 rounded-lg shadow-lg">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">

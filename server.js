@@ -2,6 +2,13 @@ import dotenv from "dotenv";
 if (process.env.NODE_ENV !== "production") {
   dotenv.config();
 }
+import dns from "node:dns";
+dns.setDefaultResultOrder("ipv4first");
+try {
+  dns.setServers(["8.8.8.8", "1.1.1.1"]);
+} catch (e) {
+  console.warn("Could not set custom DNS servers, using default resolver", e);
+}
 import fs from "node:fs/promises";
 import express from "express";
 import mongoose from "mongoose";
@@ -9,13 +16,11 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import path from "path";
 import MongoStore from "connect-mongo";
-import startScheduler from "./utils/scheduler.js";
-import CustomError from "./utils/CustomError.js";
+import startScheduler, { processRecurringTransactions } from "./utils/scheduler.js";
 import errorHandler from "./middleware/errorHandler.js";
 import { sendMonthlyAlerts } from "./utils/monthlyAlerts.js";
 import cron from "node-cron";
 
-// Connect to MongoDB
 const MONGO_URL = process.env.MONGODB_URI;
 async function main() {
   await mongoose.connect(MONGO_URL);
@@ -23,57 +28,34 @@ async function main() {
 }
 main().catch(console.error);
 
-// Constants
+
 const isProduction = process.env.NODE_ENV === "production";
 const port = process.env.PORT || 3000;
 const base = process.env.BASE || "/";
-
-// Create Express app
 const app = express();
+app.set("trust proxy", 1); // Trust first proxy (Vercel)
 
-// Middleware setup 
-app.use(express.json({ limit: "5mb" })); // Increase the request size limit
+// Traffic Advice for Chrome prefetch proxy (registered early to bypass static files middleware)
+app.get("/.well-known/traffic-advice", (req, res) => {
+  res.setHeader("Content-Type", "application/trafficadvice+json");
+  res.json([
+    {
+      user_agent: "prefetch-proxy",
+      fraction: 1.0,
+    },
+  ]);
+});
+
+
+
+app.use(express.json({ limit: "5mb" })); 
 app.use(cookieParser());
 app.use(express.urlencoded({ limit: "5mb", extended: true }));
-app.use(express.static(path.join(process.cwd(), "dist")));
-// app.use(express.static(path.join(process.cwd(), "public")));
+app.use(express.static(path.join(process.cwd(), "dist"), {
+  maxAge: '1y',
+  immutable: true
+}));
 
-// Session configuration
-const store = MongoStore.create({
-  mongoUrl: MONGO_URL,
-  crypto: { secret: process.env.SESSION_SECRET },
-  touchAfter: 24 * 3600,
-});
-store.on("error", (error) => {
-  console.error("Error in Mongo Session Store", error);
-});
-const sessionOptions = {
-  store,
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: true,
-  cookie: {
-    expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-    httpOnly: true,
-  },
-};
-app.use(session(sessionOptions));
-
-// Import routes
-import homeRoutes from "./routes/home.js";
-import authRoutes from "./routes/auth.js";
-import dashboardRoutes from "./routes/dashboard.js";
-import transactionRoutes from "./routes/transactions.js";
-import analyticsRoutes from "./routes/analytics.js";
-import scanReceiptRoutes from "./routes/scanReceipt.js";
-
-// Cached production assets
-const templateHtml = isProduction
-  ? await fs.readFile("./dist/client/index.html", "utf-8")
-  : "";
-
-// Add Vite or respective production middlewares
 /** @type {import('vite').ViteDevServer | undefined} */
 let vite;
 if (!isProduction) {
@@ -88,16 +70,101 @@ if (!isProduction) {
   const compression = (await import("compression")).default;
   const sirv = (await import("sirv")).default;
   app.use(compression());
-  app.use(base, sirv("./dist/client", { extensions: [] }));
+  app.use(base, sirv("./dist/client", {
+    extensions: [],
+    maxAge: 31536000, // 1 year cache
+    immutable: true
+  }));
 }
+
+const sessionSecret = process.env.SESSION_SECRET;
+
+const store = MongoStore.create({
+  mongoUrl: MONGO_URL,
+  crypto: { secret: sessionSecret },
+  touchAfter: 24 * 3600,
+  stringify: false,
+});
+store.decryptSession = async function (session) {
+  if (this.crypto && session) {
+    const plaintext = await this.cryptoGet(this.options.crypto.secret, session.session).catch((err) => {
+      throw new Error(err);
+    });
+    if (typeof plaintext === "object" && plaintext !== null) {
+      session.session = plaintext;
+    } else {
+      session.session = JSON.parse(plaintext);
+    }
+  }
+};
+store.on("error", (error) => {
+  console.error("Error in Mongo Session Store", error);
+});
+const sessionOptions = {
+  store,
+  secret: sessionSecret,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: isProduction, // Required for HTTPS on Vercel
+    sameSite: "lax"
+  },
+};
+app.use(session(sessionOptions));
+
+
+import homeRoutes from "./routes/home.js";
+import authRoutes from "./routes/auth.js";
+import dashboardRoutes from "./routes/dashboard.js";
+import transactionRoutes from "./routes/transactions.js";
+import analyticsRoutes from "./routes/analytics.js";
+import scanReceiptRoutes from "./routes/scanReceipt.js";
+import twilioRoutes from "./routes/twilio.js";
+
+
+const templateHtml = isProduction
+  ? await fs.readFile("./dist/client/index.html", "utf-8")
+  : "";
+
 
 // API Routes
 app.use("/api", homeRoutes);
 app.use("/api", authRoutes);
+app.use("/api", twilioRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/dashboard/:accountId", transactionRoutes);
 app.use("/api/dashboard/:accountId", analyticsRoutes);
 app.use("/api/dashboard/:accountId/transaction", scanReceiptRoutes);
+
+// Expose secure Vercel Cron endpoints
+const cronAuth = (req, res, next) => {
+  if (process.env.NODE_ENV !== "production" || req.headers["x-vercel-cron"] === "true") {
+    next();
+  } else {
+    res.status(401).json({ error: "Unauthorized" });
+  }
+};
+
+app.get("/api/cron/process-recurring", cronAuth, async (req, res, next) => {
+  try {
+    await processRecurringTransactions();
+    res.json({ success: true, message: "Recurring transactions processed successfully." });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/cron/monthly-alerts", cronAuth, async (req, res, next) => {
+  try {
+    await sendMonthlyAlerts();
+    res.json({ success: true, message: "Monthly alerts sent successfully." });
+  } catch (error) {
+    next(error);
+  }
+});
 
 // Serve HTML
 app.use("*all", async (req, res) => {
@@ -127,7 +194,24 @@ app.use("*all", async (req, res) => {
       .replace(`<!--app-head-->`, rendered.head ?? "")
       .replace(`<!--app-html-->`, rendered.html ?? "");
 
-    res.status(200).set({ "Content-Type": "text/html" }).send(html);
+    // Technical SEO: Check valid client routes to return standard 404 code for dead URLs
+    const validRoutes = [
+      /^\/$/,
+      /^\/privacy\/?$/,
+      /^\/terms\/?$/,
+      /^\/signup\/?$/,
+      /^\/login\/?$/,
+      /^\/dashboard\/?$/,
+      /^\/dashboard\/addAccount\/?$/,
+      /^\/dashboard\/[^/]+\/?$/,
+      /^\/dashboard\/[^/]+\/createTransaction\/?$/,
+      /^\/dashboard\/[^/]+\/transaction\/[^/]+\/edit\/?$/,
+      /^\/dashboard\/[^/]+\/analytics\/?$/
+    ];
+    const isValidRoute = validRoutes.some(regex => regex.test(url));
+    const statusCode = isValidRoute ? 200 : 404;
+
+    res.status(statusCode).set({ "Content-Type": "text/html" }).send(html);
   } catch (e) {
     vite?.ssrFixStacktrace(e);
     res.status(500).end(e.stack);

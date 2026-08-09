@@ -35,15 +35,20 @@ const FinanceChatbot = ({ account }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: contextualizedMessage }),
       });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || `Server responded with status ${response.status}`);
+      }
       const data = await response.json();
       setMessages(prev => [
         ...prev,
-        { sender: 'bot', text: data.reply, timestamp: new Date().toLocaleTimeString() },
+        { sender: 'bot', text: data.reply || 'No response received from assistant.', timestamp: new Date().toLocaleTimeString() },
       ]);
     } catch (error) {
+      console.error("Chatbot Error:", error);
       setMessages(prev => [
         ...prev,
-        { sender: 'bot', text: 'Sorry, an error occurred.', timestamp: new Date().toLocaleTimeString() },
+        { sender: 'bot', text: `Sorry, an error occurred: ${error.message}`, timestamp: new Date().toLocaleTimeString() },
       ]);
     }
     setIsTyping(false);
@@ -65,6 +70,7 @@ const FinanceChatbot = ({ account }) => {
   ];
 
   const formatMessage = (text) => {
+    if (!text) return null;
     const lines = text.split('\n').filter(line => line.trim() !== '');
   
     const formatInline = (line) => {

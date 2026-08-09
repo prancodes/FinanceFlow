@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ErrorMessage from '../components/ErrorMessage';
 import FormSkeleton from '../skeletons/FormSkeleton';
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 
 const EditTransaction = () => {
   const { accountId, transactionId } = useParams();
@@ -99,6 +99,7 @@ const EditTransaction = () => {
     <div>
       <Helmet>
         <title>FinanceFlow - Edit Transaction</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <form
         onSubmit={handleSubmit}

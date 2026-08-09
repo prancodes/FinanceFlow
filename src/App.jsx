@@ -1,5 +1,5 @@
 // src/App.jsx
-import React, { Suspense, lazy } from "react";
+import React, { Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import Navbar from "./layouts/Navbar";
 import Footer from "./layouts/Footer";
@@ -8,15 +8,17 @@ import HomeSkeleton from "./skeletons/HomeSkeleton";
 import GraphSkeleton from "./skeletons/GraphSkeleton";
 import ListSkeleton from "./skeletons/ListSkeleton";
 
-const Dashboard = lazy(() => import("./components/Dashboard"));
-const CreateAccForm = lazy(() => import("./components/CreateAccForm"));
-const TransactionForm = lazy(() => import("./components/TransactionForm"));
-const EditTransaction = lazy(() => import("./components/EditTransaction"));
-const AccountDetail = lazy(() => import("./components/AccountDetails"));
-const Analytics = lazy(() => import("./components/Analytics"));
-const Home = lazy(() => import("./pages/Home"));
-const Signup = lazy(() => import("./pages/Signup"));
-const Login = lazy(() => import("./pages/Login"));
+import Dashboard from "./components/Dashboard";
+import CreateAccForm from "./components/CreateAccForm";
+import TransactionForm from "./components/TransactionForm";
+import EditTransaction from "./components/EditTransaction";
+import AccountDetail from "./components/AccountDetails";
+import Analytics from "./components/Analytics";
+import Home from "./pages/Home";
+import Signup from "./pages/Signup";
+import Login from "./pages/Login";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 
 const App = () => {
   return (
@@ -93,6 +95,22 @@ const App = () => {
             element={
               <Suspense fallback={<FormSkeleton />}>
                 <Login />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/privacy"
+            element={
+              <Suspense fallback={<FormSkeleton />}>
+                <Privacy />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/terms"
+            element={
+              <Suspense fallback={<FormSkeleton />}>
+                <Terms />
               </Suspense>
             }
           />

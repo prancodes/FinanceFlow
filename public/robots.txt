@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /privacy
+Allow: /terms
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /dashboard
+
+Sitemap: https://financeflow24.vercel.app/sitemap.xml

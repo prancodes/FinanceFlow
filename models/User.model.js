@@ -15,6 +15,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    whatsappNumber: {
+      type: String,
+      unique: true,
+      sparse: true, 
+    },
     isVerified: {
       type: Boolean,
       default: false, // Defaults to false, updated to true after OTP verification
@@ -43,6 +48,15 @@ const userSchema = new mongoose.Schema(
         ref: "Budget",
       },
     ],
+    pendingWhatsappTransaction: {
+      amount: Number,
+      description: String,
+      state: {
+        type: String,
+        enum: ['awaiting_account_selection', 'none'],
+        default: 'none'
+      }
+    },
   },
   { timestamps: true } // Adds createdAt and updatedAt fields
 );

@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import ErrorMessage from '../components/ErrorMessage';
+import { PhoneInput } from "react-international-phone";
+import "react-international-phone/style.css";
+import { Helmet } from "react-helmet-async";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -8,6 +11,7 @@ const Signup = () => {
     email: "",
     password: "",
   });
+  const [whatsappPhone, setWhatsappPhone] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
@@ -26,13 +30,21 @@ const Signup = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    const phoneDigits = whatsappPhone.replace(/\D/g, '');
+    const finalWhatsapp = phoneDigits.length > 4 ? `whatsapp:+${phoneDigits}` : "";
+
     try {
       const response = await fetch("/api/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ user: formData }),
+        body: JSON.stringify({
+          user: {
+            ...formData,
+            whatsappNumber: finalWhatsapp,
+          },
+        }),
         credentials: "include",
       });
 
@@ -81,6 +93,15 @@ const Signup = () => {
 
   return (
     <div className="flex items-center justify-center lg:my-8 bg-gray-100 lg:px-4">
+      <Helmet>
+        <title>FinanceFlow - Sign Up for a Free Account</title>
+        <meta name="description" content="Join FinanceFlow today. Create a secure free account to parse receipts via AI, track transactions through WhatsApp, and manage budgets in real time." />
+        <link rel="canonical" href="https://financeflow24.vercel.app/signup" />
+        <meta property="og:title" content="FinanceFlow - Sign Up for a Free Account" />
+        <meta property="og:description" content="Join FinanceFlow today. Create a secure free account to parse receipts via AI, track transactions through WhatsApp, and manage budgets in real time." />
+        <meta property="og:url" content="https://financeflow24.vercel.app/signup" />
+        <meta property="og:image" content="https://financeflow24.vercel.app/og-image.png" />
+      </Helmet>
       <div className="w-full max-w-sm sm:max-w-md bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-center text-xl sm:text-2xl font-semibold text-gray-700 mb-6">
         FinanceFlow
@@ -108,6 +129,7 @@ const Signup = () => {
                 required
                 disabled={isLoading}
                 maxLength="6"
+                autoComplete="one-time-code"
               />
             </div>
 
@@ -144,6 +166,7 @@ const Signup = () => {
                 onChange={handleChange}
                 required
                 disabled={isLoading}
+                autoComplete="name"
               />
             </div>
 
@@ -161,6 +184,7 @@ const Signup = () => {
                 onChange={handleChange}
                 required
                 disabled={isLoading}
+                autoComplete="email"
               />
             </div>
 
@@ -178,7 +202,29 @@ const Signup = () => {
                 onChange={handleChange}
                 required
                 disabled={isLoading}
+                autoComplete="new-password"
               />
+            </div>
+            <div className="mb-4">
+              <label htmlFor="whatsappPhone" className="block text-gray-700 font-medium mb-1">
+                WhatsApp Number (Optional)
+              </label>
+              <PhoneInput
+                defaultCountry="in"
+                value={whatsappPhone}
+                onChange={(phone) => setWhatsappPhone(phone)}
+                disabled={isLoading}
+                inputClassName="!w-full !px-4 !py-2 !border !rounded-lg !focus:outline-none !focus:ring !focus:ring-blue-300"
+                className="w-full flex gap-1"
+                inputProps={{
+                  id: "whatsappPhone",
+                  name: "whatsappPhone",
+                  autoComplete: "tel"
+                }}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Required for tracking expenses via WhatsApp.
+              </p>
             </div>
 
             <button

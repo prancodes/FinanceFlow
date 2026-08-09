@@ -29,7 +29,15 @@ const HeroSection = () => {
 
         {/* Image Below the Text */}
         <div className="w-full flex justify-center mt-10">
-          <img src="./banner.jpeg" alt="AI Finance Robot" className="w-full max-w-3xl object-cover rounded-lg" />
+          <img 
+            src="/banner.jpeg" 
+            alt="AI Finance Robot - FinanceFlow Dashboard Banner" 
+            className="w-full max-w-3xl object-cover rounded-lg" 
+            width="768" 
+            height="432" 
+            fetchpriority="high"
+            decoding="sync"
+          />
         </div>
       </header>
     </div>

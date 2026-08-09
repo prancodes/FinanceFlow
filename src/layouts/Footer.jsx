@@ -14,7 +14,11 @@ const Footer = () => {
       >
         Start Free Trial
       </Link>
-      <p className="mt-8 text-sm opacity-80">© 2025 FinanceFlow. All rights reserved.</p>
+      <div className="flex gap-6 mt-8 text-sm opacity-80">
+        <Link to="/privacy" className="hover:underline hover:opacity-100 transition duration-200">Privacy Policy</Link>
+        <Link to="/terms" className="hover:underline hover:opacity-100 transition duration-200">Terms of Service</Link>
+      </div>
+      <p className="mt-4 text-xs opacity-60">© 2026 FinanceFlow. All rights reserved.</p>
     </footer>
   );
 };
