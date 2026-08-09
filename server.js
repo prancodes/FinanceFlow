@@ -2,6 +2,13 @@ import dotenv from "dotenv";
 if (process.env.NODE_ENV !== "production") {
   dotenv.config();
 }
+import dns from "node:dns";
+dns.setDefaultResultOrder("ipv4first");
+try {
+  dns.setServers(["8.8.8.8", "1.1.1.1"]);
+} catch (e) {
+  console.warn("Could not set custom DNS servers, using default resolver", e);
+}
 import fs from "node:fs/promises";
 import express from "express";
 import mongoose from "mongoose";
