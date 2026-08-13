@@ -1,0 +1,34 @@
+name: Continuous Integration
+
+# 1. Triggers: Define when this workflow will run
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# 2. Jobs: Define what tasks to execute
+jobs:
+  build-and-test:
+    # Run on a clean virtual machine hosted by GitHub running Ubuntu Linux
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository code onto the runner machine
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Node.js environment
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm' # Automatically caches node_modules for faster subsequent runs
+
+      # Step 3: Install dependencies exactly as defined in package-lock.json
+      - name: Install Dependencies
+        run: npm ci
+
+      # Step 4: Validate that the application builds successfully (client & server SSR)
+      - name: Build Application
+        run: npm run build
