@@ -23,7 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-package-lock.json
 .env
 .vercel
 temp_auto_push.bat
