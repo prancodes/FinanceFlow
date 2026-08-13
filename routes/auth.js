@@ -114,12 +114,14 @@ router.post("/verify-using-otp", async (req, res, next) => {
 
     await WelcomeEmail(createdUser.email, createdUser.name);
 
+    const isProduction = process.env.NODE_ENV === "production";
+
     jwt.sign({ userId: createdUser._id, name }, jwtSecret, {}, (err, token) => {
       if (err) {
         return next(new CustomError(500, "JWT error. Please try again later."));
       }
-      res.cookie("token", token, { sameSite: "lax", secure: true });
-      res.cookie("isLoggedIn", "true", { sameSite: "lax", secure: true });
+      res.cookie("token", token, { sameSite: "lax", secure: isProduction });
+      res.cookie("isLoggedIn", "true", { sameSite: "lax", secure: isProduction });
       return res.status(200).json({ success: true, message: "Email Verified Successfully" });
     });
   } catch (error) {
@@ -139,12 +141,13 @@ router.post("/login", async (req, res, next) => {
     const correctPass = await bcrypt.compare(password, findUser.password);
     if (correctPass) {
       req.session.userId = findUser._id;
+      const isProduction = process.env.NODE_ENV === "production";
       jwt.sign({ userId: findUser._id, name: findUser.name }, jwtSecret, {}, (err, token) => {
         if (err) {
           return next(new CustomError(500, "JWT error. Please try again later."));
         }
-        res.cookie("token", token, { sameSite: "lax", secure: true });
-        res.cookie("isLoggedIn", "true", { sameSite: "lax", secure: true });
+        res.cookie("token", token, { sameSite: "lax", secure: isProduction });
+        res.cookie("isLoggedIn", "true", { sameSite: "lax", secure: isProduction });
         res.redirect("/dashboard");
       });
     } else {
@@ -177,7 +180,8 @@ router.post("/guest", async (req, res, next) => {
     req.session.userId = guestUser._id;
     req.session.isGuest = true;
     req.session.cookie.maxAge = 7 * 60 * 1000;
-    res.cookie("isLoggedIn", "true", { sameSite: "lax", secure: true, maxAge: 7 * 60 * 1000 });
+    const isProduction = process.env.NODE_ENV === "production";
+    res.cookie("isLoggedIn", "true", { sameSite: "lax", secure: isProduction, maxAge: 7 * 60 * 1000 });
 
     res.redirect("/dashboard");
   } catch (error) {
