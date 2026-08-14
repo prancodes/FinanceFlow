@@ -1,34 +1,63 @@
-name: Continuous Integration
+name: Continuous Integration & Deployment
 
-# 1. Triggers: Define when this workflow will run
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
 
-# 2. Jobs: Define what tasks to execute
 jobs:
   build-and-test:
-    # Run on a clean virtual machine hosted by GitHub running Ubuntu Linux
     runs-on: ubuntu-latest
-
     steps:
-      # Step 1: Check out the repository code onto the runner machine
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Step 2: Set up Node.js environment
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm' # Automatically caches node_modules for faster subsequent runs
+          cache: 'npm'
 
-      # Step 3: Install dependencies exactly as defined in package-lock.json
       - name: Install Dependencies
         run: npm ci
 
-      # Step 4: Validate that the application builds successfully (client & server SSR)
       - name: Build Application
         run: npm run build
+
+  deploy:
+    name: Deploy to Vercel
+    # 1. Dependency: Run deployment ONLY if the build-and-test job completes successfully
+    needs: build-and-test
+    # 2. Safety Guard: Deploy ONLY when commits are merged directly to the main branch
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 3: Install Vercel CLI globally on the runner
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      # Step 4: Pull Vercel environment configurations (Development/Staging)
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      # Step 5: Build deployment artifacts in the cloud
+      - name: Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      # Step 6: Deploy built artifacts to production live
+      - name: Deploy to Vercel (Production)
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
