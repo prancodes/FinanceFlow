@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import { FaArrowRight, FaTrash } from 'react-icons/fa';
 import ListSkeleton from '../skeletons/ListSkeleton';
 import { Helmet } from "react-helmet-async";

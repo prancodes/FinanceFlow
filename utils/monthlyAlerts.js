@@ -9,7 +9,7 @@ import handlebars from 'handlebars';
 import { transporter } from "../middleware/Email.config.js";
 
 const genAI=new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model=genAI.getGenerativeModel({model:"gemini-2.5-flash"});
+const model=genAI.getGenerativeModel({model: process.env.GEMINI_MODEL_NAME || "gemini-2.5-flash"});
 //Here we are getting current date and month and based on that we are tracking the first and the last date of the month
 const getCurrentMonthDate=()=>{
     const now=new Date();
