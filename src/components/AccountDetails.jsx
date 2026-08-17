@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router';
 import { FaEdit, FaTrash, FaLongArrowAltLeft } from 'react-icons/fa';
 import ErrorMessage from '../components/ErrorMessage';
 import ListSkeleton from '../skeletons/ListSkeleton';

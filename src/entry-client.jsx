@@ -2,7 +2,7 @@
 import './index.css';
 import { StrictMode } from 'react';
 import { hydrateRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router';
 import { HelmetProvider } from 'react-helmet-async';
 import App from './App';
 

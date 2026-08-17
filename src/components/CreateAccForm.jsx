@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router';
 import ErrorMessage from '../components/ErrorMessage';
 import FormSkeleton from '../skeletons/FormSkeleton';
 import { Helmet } from "react-helmet-async";
@@ -33,9 +33,36 @@ const CreateAccForm = () => {
     checkAuth();
   }, [navigate]);
 
+  const handleBalanceBlur = (e) => {
+    let val = e.target.value;
+    if (!val) return;
+    try {
+      const sanitized = val.replace(/[^0-9+\-*/.]/g, '');
+      if (sanitized) {
+        const result = new Function('return ' + sanitized)();
+        if (!isNaN(result) && result >= 0) {
+          setBalance(parseFloat(result.toFixed(2)).toString());
+          setError("");
+        } else {
+          setError("Initial balance must be a valid number (0 or greater).");
+        }
+      }
+    } catch (error) {
+      setError("Invalid math expression in initial balance field.");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    
+    const parsedBalance = parseFloat(balance);
+    if (isNaN(parsedBalance) || parsedBalance < 0) {
+      setError("Please enter a valid initial balance before submitting.");
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const response = await fetch('/api/dashboard/addAccount', {
         method: 'POST',
@@ -43,7 +70,7 @@ const CreateAccForm = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          account: { name, type, balance },
+          account: { name, type, balance: parsedBalance },
         }),
       });
 
@@ -110,15 +137,23 @@ const CreateAccForm = () => {
           </div>
 
           <div className="mb-5">
-            <label htmlFor="initBalance" className="block mb-2 text-sm font-medium text-gray-900">Initial Balance</label>
+            <label htmlFor="initBalance" className="flex items-center relative group text-sm font-medium text-gray-900 mb-2 w-max">
+              Initial Balance
+              <span className="ml-2 text-gray-400 cursor-pointer text-sm">ⓘ</span>
+              <div className="absolute left-0 bottom-full mb-1 hidden group-hover:block w-56 p-3 bg-gray-800 text-white text-xs rounded shadow-lg z-10 whitespace-normal font-normal">
+                <span className="font-semibold block mb-1 text-blue-300">Math Expressions Supported!</span>
+                Type calculations directly (e.g. <code className="bg-gray-700 px-1 py-0.5 rounded text-[11px] text-gray-200">50+20*2</code>) and it will auto-calculate when you click away.
+              </div>
+            </label>
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
               id="initBalance"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
               placeholder="0.00"
-              min={1}
               value={balance}
               onChange={(e) => setBalance(e.target.value)}
+              onBlur={handleBalanceBlur}
               required
               disabled={isSubmitting}
             />

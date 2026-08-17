@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router';
 import ErrorMessage from '../components/ErrorMessage';
 import FormSkeleton from '../skeletons/FormSkeleton';
 import { Helmet } from "react-helmet-async";
@@ -61,13 +61,40 @@ const EditTransaction = () => {
     initialize();
   }, [accountId, transactionId, navigate]);
 
+  const handleAmountBlur = (e) => {
+    let val = e.target.value;
+    if (!val) return;
+    try {
+      const sanitized = val.replace(/[^0-9+\-*/.]/g, '');
+      if (sanitized) {
+        const result = new Function('return ' + sanitized)();
+        if (!isNaN(result) && result > 0) {
+          setTransaction({ ...transaction, amount: parseFloat(result.toFixed(2)) });
+          setError("");
+        } else {
+          setError("Amount must be a valid number greater than 0.");
+        }
+      }
+    } catch (error) {
+      setError("Invalid math expression in amount field.");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    
+    const parsedAmount = parseFloat(transaction.amount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      setError("Please enter a valid amount before submitting.");
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const updatedTransaction = {
         ...transaction,
-        amount: parseFloat(transaction.amount),
+        amount: parsedAmount,
       };
 
       const response = await fetch(`/api/dashboard/${accountId}/transaction/${transactionId}`, {
@@ -124,15 +151,23 @@ const EditTransaction = () => {
 
         <div className="flex gap-4 mb-4">
           <div className="flex-1">
-            <label className="block text-black mb-3">Amount</label>
+            <label className="flex items-center relative group text-black mb-3 w-max">
+              Amount
+              <span className="ml-2 text-gray-400 cursor-pointer text-sm">ⓘ</span>
+              <div className="absolute left-0 bottom-full mb-1 hidden group-hover:block w-56 p-3 bg-gray-800 text-white text-xs rounded shadow-lg z-10 whitespace-normal font-normal">
+                <span className="font-semibold block mb-1 text-blue-300">Math Expressions Supported!</span>
+                Type calculations directly (e.g. <code className="bg-gray-700 px-1 py-0.5 rounded text-[11px] text-gray-200">50+20*2</code>) and it will auto-calculate when you click away.
+              </div>
+            </label>
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
               name="transaction[amount]"
               className="w-full p-2 h-10 border border-gray-400 rounded-lg bg-gray-100 focus:ring-gray-200"
-              min={1}
               placeholder="0.00"
               value={transaction.amount}
               onChange={(e) => setTransaction({ ...transaction, amount: e.target.value })}
+              onBlur={handleAmountBlur}
               disabled={isSubmitting}
             />
           </div>

@@ -1,6 +1,6 @@
 // src/App.jsx
 import React, { Suspense } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router";
 import Navbar from "./layouts/Navbar";
 import Footer from "./layouts/Footer";
 import FormSkeleton from "./skeletons/FormSkeleton";

@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { Helmet } from "react-helmet-async";
 import { FaFileContract, FaExclamationTriangle, FaCheckCircle, FaUserCheck } from "react-icons/fa";
 

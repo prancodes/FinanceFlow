@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router";
 import { Bar, Line, Pie } from "react-chartjs-2";
 import axios from "axios";
 import ErrorMessage from '../components/ErrorMessage';
